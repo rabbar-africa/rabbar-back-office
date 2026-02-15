@@ -1,4 +1,4 @@
-import { Logo } from '@/components/Logo/Logo';
+import { Logo } from '@/components/common/Logo';
 import { Box, Center, Spinner, Text, VisuallyHidden } from '@chakra-ui/react';
 
 type Props = {

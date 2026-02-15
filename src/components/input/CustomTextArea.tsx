@@ -1,55 +1,64 @@
-import {
-  FormControl,
-  FormControlProps,
-  FormLabel,
-  FormLabelProps,
-  Textarea,
-  Text,
-  TextareaProps,
-} from '@chakra-ui/react';
+import type { CustomTextareaProps } from '@/shared/interface/input';
 import React from 'react';
-type StringInputProps = {
-  formControlProps?: FormControlProps;
-  formLabelProps?: FormLabelProps;
-  inputProps?: TextareaProps;
-  errorMessage?: string | undefined;
-  warningMessage?: string | undefined;
-  touched?: boolean | undefined;
-};
-export default function CustomTextArea(props: StringInputProps) {
+import { Field, Textarea } from '@chakra-ui/react';
+export const CustomTextarea: React.FC<CustomTextareaProps> = ({
+  label,
+  placeholder,
+  helperText,
+  required = false,
+  disabled = false,
+  variant = 'outline',
+  size = 'md',
+  error,
+  rows = 4,
+  resize = 'vertical',
+  register,
+  labelProps,
+  textAreaProps,
+  ...props
+}) => {
   return (
-    <FormControl {...props.formControlProps}>
-      <FormLabel
-        requiredIndicator={<abbr title="required field"></abbr>}
-        fontWeight={'500'}
-        fontSize={'.875rem'}
-        mb={'0.375rem'}
-        color={'#474D66'}
-        {...props.formLabelProps}
-      >
-        {props.formControlProps?.label}
-      </FormLabel>
+    <Field.Root
+      gap={0}
+      required={required}
+      invalid={!!error}
+      disabled={disabled}
+    >
+      {label && (
+        <Field.Label
+          mb={'.625rem'}
+          textStyle={'tiny-semibold'}
+          color={'gray.300'}
+          {...labelProps}
+        >
+          {label}
+          {required && <Field.RequiredIndicator color={'error.300'} />}
+        </Field.Label>
+      )}
       <Textarea
-        fontSize={'.875rem'}
-        _placeholder={{ color: '#696F8C', fontSize: '.875rem' }}
-        errorBorderColor="crimson"
-        border="1px solid #EDEFF5"
-        rounded={'.25rem'}
-        pl={'1rem'}
-        h={'3.375rem'}
-        _hover={{ borderColor: 'none' }}
-        {...props.inputProps}
+        placeholder={placeholder}
+        variant={variant}
+        borderColor={'gray.50'}
+        rounded={'.625rem'}
+        size={size}
+        rows={rows}
+        color={'gray.300'}
+        resize={resize}
+        p="16px"
+        {...register}
+        {...props}
+        {...textAreaProps}
       />
-      {props?.errorMessage && props?.touched && (
-        <Text fontSize={'12px'} color={'red'}>
-          {props.errorMessage}
-        </Text>
+      {error && (
+        <Field.ErrorText mt={'.25rem'} fontSize={'.625rem'}>
+          {error}
+        </Field.ErrorText>
       )}
-      {props?.warningMessage && (
-        <Text fontSize={'12px'} color={'primary.800'}>
-          {props.warningMessage}
-        </Text>
+      {helperText && !error && (
+        <Field.HelperText mt={'.25rem'} fontSize={'.625rem'}>
+          {helperText}
+        </Field.HelperText>
       )}
-    </FormControl>
+    </Field.Root>
   );
-}
+};

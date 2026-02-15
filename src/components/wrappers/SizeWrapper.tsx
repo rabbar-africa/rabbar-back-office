@@ -1,5 +1,5 @@
 import { chakra } from '@chakra-ui/react';
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 export default function SizeWrapper({ children }: { children: ReactNode }) {
   return (

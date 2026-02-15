@@ -1,55 +1,91 @@
-import {
-  FormControl,
-  FormControlProps,
-  FormLabel,
-  FormLabelProps,
-  Input,
-  InputProps,
-  Text,
-} from '@chakra-ui/react';
+import { Field, Input, Box } from '@chakra-ui/react';
+import type { CustomInputProps } from '@/shared/interface/input';
 
-type CustomInputProps = {
-  formControlProps?: FormControlProps;
-  formLabelProps?: FormLabelProps;
-  inputProps?: InputProps;
-  errorMessage?: string | undefined;
-  warningMessage?: string | undefined;
-  touched?: boolean | undefined;
-};
-export default function CustomInput(props: CustomInputProps) {
+export function CustomInput({
+  label,
+  placeholder,
+  helperText,
+  required = false,
+  disabled = false,
+  error,
+  type = 'text',
+  leftElement,
+  rightElement,
+  register,
+  labelProps,
+  inputProps,
+  ...props
+}: CustomInputProps) {
   return (
-    <FormControl {...props.formControlProps}>
-      <FormLabel
-        requiredIndicator={<abbr title="required field"></abbr>}
-        fontWeight={'500'}
-        fontSize={'.875rem'}
-        mb={'0.375rem'}
-        color={'#474D66'}
-        {...props.formLabelProps}
-      >
-        {props.formControlProps?.label}
-      </FormLabel>
-      <Input
-        fontSize={'.875rem'}
-        _placeholder={{ color: '#696F8C', fontSize: '.875rem' }}
-        errorBorderColor="crimson"
-        border="1px solid #EDEFF5"
-        rounded={'.25rem'}
-        pl={'1rem'}
-        h={'3.375rem'}
-        _hover={{ borderColor: 'none' }}
-        {...props.inputProps}
-      />
-      {props?.errorMessage && props?.touched && (
-        <Text fontSize={'12px'} color={'red'}>
-          {props.errorMessage}
-        </Text>
+    <Field.Root
+      gap={0}
+      required={required}
+      invalid={!!error}
+      disabled={disabled}
+    >
+      {label && (
+        <Field.Label
+          mb={'.625rem'}
+          textStyle={'tiny-semibold'}
+          color={'gray.300'}
+          {...labelProps}
+        >
+          {label}
+          {required && <Field.RequiredIndicator color={'error.300'} mb={0} />}
+        </Field.Label>
       )}
-      {props?.warningMessage && (
-        <Text fontSize={'12px'} color={'primary.800'}>
-          {props.warningMessage}
-        </Text>
+      <Box position="relative" w={'100%'}>
+        {leftElement && (
+          <Box
+            position="absolute"
+            left="16px"
+            top="50%"
+            transform="translateY(-50%)"
+            zIndex={1}
+          >
+            {leftElement}
+          </Box>
+        )}
+        <Input
+          type={type}
+          placeholder={placeholder}
+          px="16px"
+          pl={leftElement ? '48px' : undefined}
+          pr={rightElement ? '48px' : undefined}
+          borderColor={'gray.100'}
+          h={'2.5rem'}
+          color={'gray.500'}
+          _placeholder={{
+            textStyle: 'tiny-regular',
+            ...inputProps?._placeholder,
+            color: 'gray.100',
+          }}
+          {...register}
+          {...props}
+          {...inputProps}
+        />
+        {rightElement && (
+          <Box
+            position="absolute"
+            right="16px"
+            top="50%"
+            transform="translateY(-50%)"
+            zIndex={1}
+          >
+            {rightElement}
+          </Box>
+        )}
+      </Box>
+      {error && (
+        <Field.ErrorText mt={'.25rem'} fontSize={'.625rem'}>
+          {error}
+        </Field.ErrorText>
       )}
-    </FormControl>
+      {helperText && !error && (
+        <Field.HelperText mt={'.25rem'} fontSize={'.625rem'}>
+          {helperText}
+        </Field.HelperText>
+      )}
+    </Field.Root>
   );
 }

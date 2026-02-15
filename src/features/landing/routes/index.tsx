@@ -1,7 +1,7 @@
-import { RouteError } from '@/components/error/ErrorElement';
 import { lazyImport } from '@/utils/lazyImports';
-import { Outlet, RouteObject } from 'react-router-dom';
+import { Outlet, type RouteObject } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { RouteError } from '@/components/error';
 const { Home } = lazyImport(() => import('../components/Home'), 'Home');
 
 export const LandingPageRouteList: RouteObject[] = [

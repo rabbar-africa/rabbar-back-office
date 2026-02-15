@@ -1,39 +1,51 @@
-import { DurationType } from '@/shared/interface/time';
-import { getExpiresTime } from './getExpirationTime';
+/* eslint-disable no-console */
+import type { DurationType } from '@/shared/interface/time';
 
-const storagePrefix = 'keza_web_app__';
+const storagePrefix = 'hanypay_super_admin__';
 
 export type keyType =
   | 'refresh_token'
   | 'access_token'
   | 'redirect_path'
-  | 'theme'
-  | 'msw-data';
+  | 'current_org'
+  | 'user_organizations';
 
 const DEFAULT_EXPIRY_DURATION: DurationType = { unit: 'DAY', value: 1 };
 
+function getExpiresTime(payload: DurationType) {
+  switch (payload.unit) {
+    case 'SECOND':
+      return new Date().getTime() + 1000 * payload.value;
+    case 'MINUTE':
+      return new Date().getTime() + 1000 * 60 * payload.value;
+    case 'HOUR':
+      return new Date().getTime() + 1000 * 60 * 60 * payload.value;
+  }
+}
+
 const storage = {
-  getValue: (key: keyType) => {
-    const itemStr = window.localStorage.getItem(`${storagePrefix}${key}`);
-    if (!itemStr) {
-      return null;
-    }
-    const item = JSON.parse(itemStr);
-    const now = new Date().getTime();
+  getValue: <T = any>(key: keyType, defaultValue?: T): T | null | undefined => {
+    try {
+      const itemStr = window.localStorage.getItem(`${storagePrefix}${key}`);
+      if (!itemStr) {
+        return null;
+      }
+      const item = JSON.parse(itemStr);
+      const now = new Date().getTime();
 
-    if (now > item.expiresIn) {
-      storage.clearValue(key);
-      return null;
-    }
+      if (now > item.expiresIn) {
+        storage.clearValue(key);
+        return null;
+      }
 
-    return item.value;
+      return item.value;
+    } catch (error: any) {
+      console.warn(`Error reading from localStorage key "${key}":`, error);
+      return defaultValue;
+    }
   },
 
-  setValue: (
-    key: keyType,
-    value: unknown,
-    duration?: DurationType | undefined
-  ) => {
+  setValue: (key: keyType, value: unknown, duration?: DurationType) => {
     const item = {
       value: value,
       expiresIn: getExpiresTime(duration || DEFAULT_EXPIRY_DURATION),

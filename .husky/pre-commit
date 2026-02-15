@@ -1,9 +1,25 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
 
-npm run lint
-npm run format
-npm run check-typing
+echo "🚀 Running pre-commit checks..."
+
+# Format all files
+echo "📝 Running format..."
+yarn run format
+
+# Run lint-staged for staged files
+echo "📝 Running lint-staged..."
+yarn lint
+
+
+# Generate types
+echo "🔍 Generating type ..."
+yarn  run gen:theme-typings
+
+# Run type checking across all packages
+echo "🔍 Running type checks..."
+yarn check-types
+
 git add -A .
+
+echo "✅ Pre-commit checks completed successfully!"

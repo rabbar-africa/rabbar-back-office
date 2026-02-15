@@ -1,7 +1,7 @@
-import { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { axios } from '.';
 import { getToken } from '@/utils/persistToken';
 import storage from '@/utils/storage';
+import { AxiosError } from 'axios';
+import type { InternalAxiosRequestConfig } from 'axios';
 
 export function rejectErrorInterceptor(error: AxiosError) {
   return Promise.reject(error);
@@ -10,36 +10,40 @@ export function rejectErrorInterceptor(error: AxiosError) {
 //Append bearer token to headers
 export function authRequestInterceptor(config: InternalAxiosRequestConfig) {
   const token = getToken().accessToken;
-  if (token) {
+
+  if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  config.headers.Accept = 'application/json';
-
+  if (config.headers) {
+    config.headers.Accept = 'application/json';
+  }
   return config;
 }
 
-export async function refreshTokenInterceptor(error: any) {
-  const prevRequest = { ...error?.config };
-  //dummy refresh token
-  const refreshToken = '24evin09gbnw';
+export async function refreshTokenInterceptor(error: AxiosError) {
+  const status = error?.response?.status;
+  const message: any = error?.response?.data;
 
   // Check if the response is unauthorized (401 or 520) and the request hasn't been retried yet
-  if ([401, 520].includes(error?.response?.status) && !prevRequest?.sent) {
-    prevRequest.sent = true;
-
-    try {
-      //  refresh token
-      // const response = await refreshToken();
-
-      // setAccessToken(response?.data?.accessToken);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${refreshToken}`;
-      return axios(prevRequest);
-    } catch (err: any) {
-      storage.reset();
-      window.location.assign(window.location.origin);
-
-      return Promise.reject(err);
-    }
+  if (
+    (status === 401 || status === 520) &&
+    typeof message === 'string' &&
+    (message.toLowerCase() === 'jwt expired' ||
+      message.toLowerCase() === 'please authenticate')
+  ) {
+    storage.clearValue('access_token');
+    storage.clearValue('refresh_token');
+    window.location.assign(window.location.origin + '/auth/login');
+  }
+  if (
+    (status === 401 || status === 520) &&
+    typeof message === 'object' &&
+    (message.message?.toLowerCase() === 'jwt expired' ||
+      message.message?.toLowerCase() === 'please authenticate')
+  ) {
+    storage.clearValue('access_token');
+    storage.clearValue('refresh_token');
+    window.location.assign(window.location.origin + '/auth/login');
   }
 
   return Promise.reject(error);

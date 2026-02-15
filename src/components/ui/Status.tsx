@@ -1,5 +1,5 @@
 import { getStatusColor } from '@/utils/get-color';
-import { BoxProps, Center } from '@chakra-ui/react';
+import { type BoxProps, Center } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
 
 export default function Status({

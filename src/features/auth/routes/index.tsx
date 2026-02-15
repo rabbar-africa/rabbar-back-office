@@ -1,7 +1,7 @@
 import { lazyImport } from '@/utils/lazyImports';
-import { Outlet, RouteObject } from 'react-router-dom';
+import { Outlet, type RouteObject } from 'react-router-dom';
 import Layout from '../components/Layout';
-import { RouteError } from '@/components/error/ErrorElement';
+import { RouteError } from '@/components/error';
 const { Login } = lazyImport(() => import('../components/Login'), 'Login');
 const { Signup } = lazyImport(() => import('../components/Signup'), 'Signup');
 
