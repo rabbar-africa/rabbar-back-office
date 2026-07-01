@@ -1,8 +1,8 @@
 import { AuthRoutes } from '@/features/auth/routes';
 import { LandingPageRoutes } from '@/features/landing/routes';
 import { type RouteObject } from 'react-router-dom';
-import { BaseApp } from './BaseApp';
 import { RouteError } from '@/components/error';
+import { BaseApp } from './BaseApp';
 
 export const RoutesList: RouteObject[] = [
   {
