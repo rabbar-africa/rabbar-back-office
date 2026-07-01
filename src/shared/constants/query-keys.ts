@@ -35,4 +35,8 @@ export const customQueryKey = {
     getById: 'get-admin-user-by-id',
   },
   business: { getAll: 'get-all-businesses', getById: 'get-business-by-id' },
+  organizations: {
+    getAll: 'get-all-organizations',
+    getById: 'get-organization-by-id',
+  },
 };
