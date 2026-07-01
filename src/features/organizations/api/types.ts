@@ -1,4 +1,7 @@
 import type { IBaseFilter } from '@/shared/interface/filter';
+import type { CreateOrgBankAccountPayload } from '@/shared/interface/settings';
+
+export type UpdateOrgBankAccountPayload = Partial<CreateOrgBankAccountPayload>;
 
 export interface CreateOrganizationPayload {
   name: string;
