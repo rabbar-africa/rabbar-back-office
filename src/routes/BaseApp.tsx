@@ -4,6 +4,7 @@ import SectionLoader from '@/components/common/SectionLoader';
 import { useGetCurrentUserQuery } from '@/features/auth/api';
 import { RouteConstants } from '@/shared/constants/routes';
 import { getToken, removeToken } from '@/utils/persistToken';
+import { useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 export function BaseApp() {
@@ -15,7 +16,14 @@ export function BaseApp() {
   const { isLoading, isSuccess, isError } = useGetCurrentUserQuery({
     enabled: isAuthenticated,
   });
-  if (!isAuthenticated) {
+
+  useEffect(() => {
+    if (isError) {
+      removeToken();
+    }
+  }, [isError]);
+
+  if (!isAuthenticated || isError) {
     return (
       <Navigate
         to={RouteConstants.auth.login.path}
@@ -27,18 +35,6 @@ export function BaseApp() {
 
   if (isLoading) {
     return <SectionLoader h={'100vh'} />;
-  }
-
-  if (isError) {
-    removeToken();
-
-    return (
-      <Navigate
-        to={RouteConstants.auth.login.path}
-        state={{ from: location }}
-        replace
-      />
-    );
   }
 
   if (isSuccess) {

@@ -9,8 +9,9 @@ export const RoutesList: RouteObject[] = [
     path: '',
     element: <BaseApp />,
     errorElement: <RouteError />,
-    children: [LandingPageRoutes, AuthRoutes],
+    children: [LandingPageRoutes],
   },
+  AuthRoutes,
   {
     path: '*',
     element: <div>Not Found</div>,

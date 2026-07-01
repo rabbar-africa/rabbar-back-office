@@ -2,28 +2,24 @@ import { lazyImport } from '@/utils/lazyImports';
 import { Outlet, type RouteObject } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { RouteError } from '@/components/error';
+import { RouteConstants } from '@/shared/constants/routes';
 const { Login } = lazyImport(() => import('../components/Login'), 'Login');
-const { Signup } = lazyImport(() => import('../components/Signup'), 'Signup');
 
 export const AuthRouteList: RouteObject[] = [
   {
-    path: 'login',
+    path: RouteConstants.auth.login.path,
     element: <Login />,
-  },
-  {
-    path: 'signup',
-    element: <Signup />,
   },
 ];
 
-const LandingPagesRouteOutlet = (
+const AuthPagesRouteOutlet = (
   <Layout>
     <Outlet />
   </Layout>
 );
 export const AuthRoutes: RouteObject = {
   path: '',
-  element: LandingPagesRouteOutlet,
+  element: AuthPagesRouteOutlet,
   errorElement: <RouteError />,
   children: AuthRouteList,
 };
