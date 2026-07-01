@@ -28,7 +28,7 @@ import { OrgSettingsTab } from '../components/tabs/OrgSettingsTab';
 
 const TABS = [
   { value: 'invoices', label: 'Invoices' },
-  { value: 'payments', label: 'Payments Received' },
+  { value: 'payments', label: 'Payments' },
   { value: 'items', label: 'Items' },
   { value: 'customers', label: 'Customers' },
   { value: 'subscription', label: 'Subscription' },

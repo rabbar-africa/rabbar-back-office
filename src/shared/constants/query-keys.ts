@@ -53,4 +53,8 @@ export const customQueryKey = {
     getAll: 'get-all-items',
     getById: 'get-item-by-id',
   },
+  payments: {
+    getAll: 'get-all-payments',
+    getById: 'get-payment-by-id',
+  },
 };

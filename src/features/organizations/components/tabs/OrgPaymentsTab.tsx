@@ -1,46 +1,66 @@
-import { type ColumnDef } from '@tanstack/react-table';
+import { useState } from 'react';
+import { Flex } from '@chakra-ui/react';
+import { useParams } from 'react-router-dom';
 import { CustomTable } from '@/components/table';
-import Status from '@/components/common/Status';
-import { formatAmount } from '@/utils/format-number';
-import {
-  PAYMENT_METHOD_LABELS,
-  type Payment,
-  type PaymentMethod,
-} from '@/shared/interface/payment';
-import { paymentsData } from '@/features/payments/data';
+import { SearchInput } from '@/components/input';
+import { useUrlState } from '@/hooks/useUrlState';
+import { useGetPayments } from '@/features/payments/api/query';
+import { paymentListColumns } from '@/features/payments/components/payment-columns';
 
-const columns: ColumnDef<Payment, any>[] = [
-  { accessorKey: 'paymentNumber', header: 'Payment #' },
-  {
-    id: 'customer',
-    header: 'Customer',
-    accessorFn: (row) => row.customer.name,
-  },
-  { accessorKey: 'invoiceNumber', header: 'Invoice #' },
-  {
-    accessorKey: 'amount',
-    header: 'Amount',
-    cell: ({ getValue }) => formatAmount(getValue() as number),
-  },
-  {
-    accessorKey: 'paymentMethod',
-    header: 'Method',
-    cell: ({ getValue }) => PAYMENT_METHOD_LABELS[getValue() as PaymentMethod],
-  },
-  { accessorKey: 'paymentDate', header: 'Date' },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ getValue }) => <Status name={getValue() as string} />,
-  },
-];
+const FILTER_SCHEMA = {
+  page: { defaultValue: 1 },
+  limit: { defaultValue: 20 },
+  search: { defaultValue: '' },
+};
 
 export function OrgPaymentsTab() {
+  const { id } = useParams<{ id: string }>();
+  const [filters, setFilters] = useUrlState(FILTER_SCHEMA, {
+    replace: true,
+    prefix: 'payment_',
+  });
+  const [searchInput, setSearchInput] = useState(filters.search);
+
+  const { data, isPending } = useGetPayments(
+    {
+      organizationId: id,
+      page: filters.page,
+      limit: filters.limit,
+      ...(filters.search ? { search: filters.search } : {}),
+    },
+    { enabled: !!id }
+  );
+
+  const payments = data?.data || [];
+  const meta = data?.meta;
+
   return (
-    <CustomTable
-      data={paymentsData}
-      columns={columns}
-      NoDataText="No payments for this organization"
-    />
+    <Flex direction="column" gap="1rem">
+      <SearchInput
+        placeholder="Search by payment # or customer"
+        value={searchInput}
+        onChange={setSearchInput}
+        onSearch={(val) => setFilters({ search: val, page: 1 })}
+        debounceMs={500}
+        loading={isPending}
+        width={{ base: '100%', md: '22rem' }}
+      />
+
+      <CustomTable
+        data={payments}
+        columns={paymentListColumns}
+        loading={isPending}
+        NoDataText="No payments for this organization"
+        pagination={{
+          pageIndex: filters.page - 1,
+          pageSize: filters.limit,
+        }}
+        setPagination={({ pageIndex }) => setFilters({ page: pageIndex + 1 })}
+        pageCount={meta?.totalPages ?? 1}
+        totalItems={meta?.total}
+        hasNextPage={filters.page < (meta?.totalPages ?? 1)}
+        hasPrevPage={filters.page > 1}
+      />
+    </Flex>
   );
 }
