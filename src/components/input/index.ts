@@ -1,6 +1,7 @@
 export * from './CustomCheckBox';
 export * from './CustomCheckboxCard';
 export * from './CustomInput';
+export * from './DateField';
 export * from './CustomNumberInput';
 export * from './CustomRadioCard';
 export * from './CustomRadioGroup';
@@ -9,4 +10,5 @@ export * from './CustomSelect';
 export * from './CustomSwitch';
 export * from './CustomTagInput';
 export * from './CustomTextArea';
+export * from './SearchCombobox';
 export * from './SearchInput';
