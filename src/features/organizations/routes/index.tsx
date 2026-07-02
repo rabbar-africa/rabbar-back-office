@@ -10,6 +10,10 @@ const { OrganizationDetails } = lazyImport(
   () => import('../pages/OrganizationDetails'),
   'OrganizationDetails'
 );
+const { OrganizationEdit } = lazyImport(
+  () => import('../pages/OrganizationEdit'),
+  'OrganizationEdit'
+);
 
 export const OrganizationRoutes: RouteObject[] = [
   {
@@ -19,5 +23,9 @@ export const OrganizationRoutes: RouteObject[] = [
   {
     path: RouteConstants.organizations.detail.path,
     element: <OrganizationDetails />,
+  },
+  {
+    path: RouteConstants.organizations.edit.path,
+    element: <OrganizationEdit />,
   },
 ];

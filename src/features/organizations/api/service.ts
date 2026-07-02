@@ -7,6 +7,9 @@ import type {
   CreateOrgAddressPayload,
   UpdateOrgAddressPayload,
   CreateOrgBankAccountPayload,
+  IOrgTransactionSeries,
+  UpsertOrgTransactionSeriesPayload,
+  TxnSeriesModule,
 } from '@/shared/interface/settings';
 import { buildUrlWithQueryParams } from '@/utils/build-url-query';
 import type {
@@ -195,6 +198,38 @@ export const organizationBankAccountService = {
   setPrimary: async ({ id, accountId }: { id: string; accountId: string }) => {
     const response = await axios.patch<ApiResponse<IOrgBankAccount>>(
       `${BASE_PATH}/${id}/bank-accounts/${accountId}/primary`
+    );
+    return response.data;
+  },
+};
+
+export const organizationTransactionSeriesService = {
+  getAll: async (id: string) => {
+    const response = await axios.get<ApiResponse<IOrgTransactionSeries[]>>(
+      `${BASE_PATH}/${id}/transaction-series`
+    );
+    return response.data;
+  },
+
+  upsert: async ({
+    id,
+    module,
+    payload,
+  }: {
+    id: string;
+    module: TxnSeriesModule;
+    payload: UpsertOrgTransactionSeriesPayload;
+  }) => {
+    const response = await axios.put<ApiResponse<IOrgTransactionSeries>>(
+      `${BASE_PATH}/${id}/transaction-series/${module}`,
+      payload
+    );
+    return response.data;
+  },
+
+  remove: async ({ id, module }: { id: string; module: TxnSeriesModule }) => {
+    const response = await axios.delete<ApiResponse<null>>(
+      `${BASE_PATH}/${id}/transaction-series/${module}`
     );
     return response.data;
   },

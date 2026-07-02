@@ -60,14 +60,7 @@ export function Login() {
             mb={'.625rem'}
             textAlign={{ base: 'center', lg: 'left' }}
           >
-            Sign In to Your Account
-          </Text>
-          <Text
-            textStyle={'small-regular'}
-            textAlign={{ base: 'center', lg: 'left' }}
-          >
-            Please enter your registered email address and password to access
-            your workspace.
+            Back Office
           </Text>
 
           <chakra.form
