@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import type { DurationType } from '@/shared/interface/time';
 
-const cookiePrefix = 'hanypay_super_admin__';
+const cookiePrefix = 'rabbar_back_office__';
 
 export type CookieKeyType =
   | 'refresh_token'

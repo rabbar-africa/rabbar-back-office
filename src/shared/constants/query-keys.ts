@@ -35,4 +35,32 @@ export const customQueryKey = {
     getById: 'get-admin-user-by-id',
   },
   business: { getAll: 'get-all-businesses', getById: 'get-business-by-id' },
+  organizations: {
+    getAll: 'get-all-organizations',
+    getById: 'get-organization-by-id',
+    getAddresses: 'get-organization-addresses',
+    getBankAccounts: 'get-organization-bank-accounts',
+  },
+  customers: {
+    getAll: 'get-all-customers',
+    getById: 'get-customer-by-id',
+  },
+  invoices: {
+    getAll: 'get-all-invoices',
+    getById: 'get-invoice-by-id',
+  },
+  items: {
+    getAll: 'get-all-items',
+    getById: 'get-item-by-id',
+  },
+  payments: {
+    getAll: 'get-all-payments',
+    getById: 'get-payment-by-id',
+  },
+  subscriptions: {
+    getByOrg: 'get-organization-subscription',
+  },
+  plans: {
+    getAll: 'get-all-plans',
+  },
 };
