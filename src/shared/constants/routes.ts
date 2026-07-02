@@ -57,6 +57,7 @@ const organizations = {
   base: defineRoute('/organizations' as const),
   create: defineRoute('/organizations/create' as const),
   detail: defineRoute('/organizations/:id' as const),
+  edit: defineRoute('/organizations/:id/edit' as const),
 } as const;
 
 const customers = {
