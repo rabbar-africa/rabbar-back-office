@@ -138,7 +138,6 @@ export function BankAccountModal({
 
               <Dialog.Footer p={0} mt="2rem" gap=".75rem">
                 <Button
-                  type="button"
                   variant="outlineSecondary"
                   onClick={() => onOpenChange({ open: false })}
                   disabled={isPending}

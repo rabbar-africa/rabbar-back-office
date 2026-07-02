@@ -70,7 +70,6 @@ export function LogoForm({ id, org }: LogoFormProps) {
 
       <Flex justify="flex-end" mt="1.5rem">
         <Button
-          type="button"
           bg="primary.500"
           color="white"
           _hover={{ bg: 'primary.600' }}

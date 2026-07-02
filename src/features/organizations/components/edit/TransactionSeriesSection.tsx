@@ -77,7 +77,6 @@ export function TransactionSeriesSection({
               >
                 <Flex
                   as="button"
-                  type="button"
                   w="100%"
                   align="center"
                   justify="space-between"
