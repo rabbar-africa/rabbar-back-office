@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Box,
   Button,
   Flex,
@@ -64,6 +65,19 @@ export function OrganizationDetailsTemplate() {
 
       <Flex justify="space-between" align="center" wrap="wrap" gap="1rem">
         <Flex align="center" gap=".75rem">
+          <Avatar.Root
+            shape="rounded"
+            size="lg"
+            border="1px solid"
+            borderColor="gray.75"
+            bg="gray.50"
+          >
+            <Avatar.Fallback name={org?.name || 'Organization'} />
+            <Avatar.Image
+              src={org?.logoUrl || ''}
+              alt={`${org?.name || 'organization'} logo`}
+            />
+          </Avatar.Root>
           <Heading fontSize="1.5rem" fontWeight="600">
             {org?.name || 'Organization'}
           </Heading>

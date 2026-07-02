@@ -40,6 +40,7 @@ export const customQueryKey = {
     getById: 'get-organization-by-id',
     getAddresses: 'get-organization-addresses',
     getBankAccounts: 'get-organization-bank-accounts',
+    getTransactionSeries: 'get-organization-transaction-series',
   },
   customers: {
     getAll: 'get-all-customers',
