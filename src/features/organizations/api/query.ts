@@ -5,6 +5,7 @@ import {
   organizationsService,
   organizationAddressService,
   organizationBankAccountService,
+  organizationTransactionSeriesService,
   organizationsSubscriptionService,
 } from './service';
 import type { IGetOrganizationsFilter } from './types';
@@ -262,6 +263,46 @@ export function useSetPrimaryOrganizationBankAccount(
     meta: {
       successMessage: 'Primary bank account updated',
       invalidatesQuery: [customQueryKey.organizations.getBankAccounts],
+    },
+    ...config,
+  });
+}
+
+/* ── Transaction series ────────────────────────────────────────────────── */
+
+export function useGetOrganizationTransactionSeries(
+  id: string,
+  config?: QueryConfigType<typeof organizationTransactionSeriesService.getAll>
+) {
+  return useQuery({
+    queryKey: [customQueryKey.organizations.getTransactionSeries, id],
+    queryFn: () => organizationTransactionSeriesService.getAll(id),
+    enabled: !!id,
+    ...config,
+  });
+}
+
+export function useUpsertOrganizationTransactionSeries(
+  config?: MutationConfig<typeof organizationTransactionSeriesService.upsert>
+) {
+  return useMutation({
+    mutationFn: organizationTransactionSeriesService.upsert,
+    meta: {
+      successMessage: 'Transaction series saved successfully',
+      invalidatesQuery: [customQueryKey.organizations.getTransactionSeries],
+    },
+    ...config,
+  });
+}
+
+export function useDeleteOrganizationTransactionSeries(
+  config?: MutationConfig<typeof organizationTransactionSeriesService.remove>
+) {
+  return useMutation({
+    mutationFn: organizationTransactionSeriesService.remove,
+    meta: {
+      successMessage: 'Transaction series removed successfully',
+      invalidatesQuery: [customQueryKey.organizations.getTransactionSeries],
     },
     ...config,
   });
