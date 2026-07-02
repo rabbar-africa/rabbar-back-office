@@ -5,6 +5,7 @@ import {
   organizationsService,
   organizationAddressService,
   organizationBankAccountService,
+  organizationsSubscriptionService,
 } from './service';
 import type { IGetOrganizationsFilter } from './types';
 
@@ -262,6 +263,83 @@ export function useSetPrimaryOrganizationBankAccount(
       successMessage: 'Primary bank account updated',
       invalidatesQuery: [customQueryKey.organizations.getBankAccounts],
     },
+    ...config,
+  });
+}
+
+/* ── Subscription & plans ──────────────────────────────────────────────── */
+
+function useInvalidateSubscription() {
+  const queryClient = useQueryClient();
+  return () =>
+    queryClient.invalidateQueries({
+      queryKey: [customQueryKey.subscriptions.getByOrg],
+    });
+}
+
+export function useGetOrganizationSubscription(
+  id: string,
+  config?: QueryConfigType<
+    typeof organizationsSubscriptionService.getSubscription
+  >
+) {
+  return useQuery({
+    queryKey: [customQueryKey.subscriptions.getByOrg, id],
+    queryFn: () => organizationsSubscriptionService.getSubscription(id),
+    enabled: !!id,
+    ...config,
+  });
+}
+
+export function useGetPlans(
+  config?: QueryConfigType<typeof organizationsSubscriptionService.getPlans>
+) {
+  return useQuery({
+    queryKey: [customQueryKey.plans.getAll],
+    queryFn: () => organizationsSubscriptionService.getPlans(),
+    ...config,
+  });
+}
+
+export function useCreateManualSubscription(
+  config?: MutationConfig<
+    typeof organizationsSubscriptionService.createManualSubscription
+  >
+) {
+  const invalidate = useInvalidateSubscription();
+  return useMutation({
+    mutationFn: organizationsSubscriptionService.createManualSubscription,
+    meta: { successMessage: 'Payment recorded successfully' },
+    onSuccess: invalidate,
+    ...config,
+  });
+}
+
+export function useCancelSubscription(
+  config?: MutationConfig<
+    typeof organizationsSubscriptionService.cancelSubscription
+  >
+) {
+  const invalidate = useInvalidateSubscription();
+  return useMutation({
+    mutationFn: organizationsSubscriptionService.cancelSubscription,
+    meta: { successMessage: 'Subscription cancelled' },
+    onSuccess: invalidate,
+    ...config,
+  });
+}
+
+export function useReactivateSubscription(
+  config?: MutationConfig<
+    typeof organizationsSubscriptionService.reactivateCancelledSubscription
+  >
+) {
+  const invalidate = useInvalidateSubscription();
+  return useMutation({
+    mutationFn:
+      organizationsSubscriptionService.reactivateCancelledSubscription,
+    meta: { successMessage: 'Subscription reactivated' },
+    onSuccess: invalidate,
     ...config,
   });
 }

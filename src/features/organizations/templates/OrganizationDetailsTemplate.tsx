@@ -7,15 +7,12 @@ import {
   Portal,
   Text,
 } from '@chakra-ui/react';
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Tabs } from '@chakra-ui/react';
 import { ArrowLeft } from '@/assets/custom';
 import Status from '@/components/common/Status';
 import SectionLoader from '@/components/common/SectionLoader';
-import ConsentDialog from '@/components/common/ConsentDialog';
 import { TabsTrigger } from '@/components/common/Tabs';
-import { toaster } from '@/components/ui';
 import { RouteConstants } from '@/shared/constants/routes';
 import { useUrlState } from '@/hooks/useUrlState';
 import { useGetOrganizationById } from '../api/query';
@@ -41,27 +38,12 @@ export function OrganizationDetailsTemplate() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [{ tab }, setUrlState] = useUrlState(TAB_SCHEMA, { replace: true });
-  const [cancelOpen, setCancelOpen] = useState(false);
-  const [cancelling, setCancelling] = useState(false);
 
   const { data, isPending } = useGetOrganizationById(id!);
   const org = data?.data;
 
   const goToEdit = () =>
     navigate(RouteConstants.organizations.edit.generate({ id: id! }));
-
-  const handleCancelSubscription = () => {
-    // TODO: wire to the cancel-subscription endpoint once available.
-    setCancelling(true);
-    setTimeout(() => {
-      setCancelling(false);
-      setCancelOpen(false);
-      toaster.create({
-        type: 'success',
-        description: 'Subscription cancelled',
-      });
-    }, 600);
-  };
 
   if (isPending) return <SectionLoader />;
 
@@ -104,14 +86,6 @@ export function OrganizationDetailsTemplate() {
                 <Menu.Item value="update" onClick={goToEdit}>
                   Update Organization
                 </Menu.Item>
-                <Menu.Item
-                  value="cancel"
-                  color="error.300"
-                  _hover={{ bg: 'error.50' }}
-                  onClick={() => setCancelOpen(true)}
-                >
-                  Cancel Subscription
-                </Menu.Item>
               </Menu.Content>
             </Menu.Positioner>
           </Portal>
@@ -150,12 +124,7 @@ export function OrganizationDetailsTemplate() {
             {tab === 'customers' && <OrgCustomersTab />}
           </Tabs.Content>
           <Tabs.Content value="subscription">
-            {tab === 'subscription' && (
-              <OrgSubscriptionTab
-                plan={org?.industry}
-                onCancel={() => setCancelOpen(true)}
-              />
-            )}
+            {tab === 'subscription' && <OrgSubscriptionTab />}
           </Tabs.Content>
           <Tabs.Content value="settings">
             {tab === 'settings' && (
@@ -164,18 +133,6 @@ export function OrganizationDetailsTemplate() {
           </Tabs.Content>
         </Box>
       </Tabs.Root>
-
-      <ConsentDialog
-        open={cancelOpen}
-        onOpenChange={({ open }) => setCancelOpen(open)}
-        handleSubmit={handleCancelSubscription}
-        isLoading={cancelling}
-        heading="Cancel subscription?"
-        note="This organization will lose access to paid features at the end of the current billing period."
-        confirmText="Yes, Cancel"
-        cancelText="Keep Subscription"
-        variant="danger"
-      />
     </Flex>
   );
 }

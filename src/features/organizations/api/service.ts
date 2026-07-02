@@ -14,6 +14,9 @@ import type {
   UpdateOrganizationPayload,
   UpdateOrgBankAccountPayload,
   IGetOrganizationsFilter,
+  IPlan,
+  IOrganizationSubscription,
+  CreateManualPaymentPayload,
 } from './types';
 
 const BASE_PATH = 'back-office/organizations';
@@ -199,43 +202,38 @@ export const organizationBankAccountService = {
 
 export const organizationsSubscriptionService = {
   getSubscription: async (id: string) => {
-    const response = await axios.get<ApiResponse<any>>(
-      `/back-office/subscriptions/${id}`
+    const response = await axios.get<ApiResponse<IOrganizationSubscription>>(
+      `back-office/subscriptions/${id}`
     );
     return response.data;
   },
 
+  getPlans: async () => {
+    const response = await axios.get<ApiResponse<IPlan[]>>('back-office/plans');
+    return response.data;
+  },
+
   cancelSubscription: async (id: string) => {
-    const response = await axios.post<ApiResponse<any>>(
-      `/api/v1/back-office/subscriptions/${id}/cancel`
+    const response = await axios.post<ApiResponse<IOrganizationSubscription>>(
+      `back-office/subscriptions/${id}/cancel`
     );
     return response.data;
   },
 
   createManualSubscription: async (data: {
     id: string;
-    payload: {
-      planTier: string;
-      amount: number;
-      currency: string;
-      periodStart: string;
-      periodMonths: number;
-      paidAt: string;
-      method: string;
-      reference: string;
-      note: string;
-    };
+    payload: CreateManualPaymentPayload;
   }) => {
-    const response = await axios.post<ApiResponse<any>>(
-      `/api/v1/back-office/subscriptions/${data.id}/payments`,
+    const response = await axios.post<ApiResponse<IOrganizationSubscription>>(
+      `back-office/subscriptions/${data.id}/payments`,
       data.payload
     );
     return response.data;
   },
 
-  reactivateCancelledSubscription: async ({ id }) => {
-    const response = await axios.patch<ApiResponse<any>>(
-      `/api/v1/back-office/subscriptions/${id}/reactivate`
+  reactivateCancelledSubscription: async (id: string) => {
+    const response = await axios.patch<ApiResponse<IOrganizationSubscription>>(
+      `back-office/subscriptions/${id}/reactivate`
     );
     return response.data;
   },

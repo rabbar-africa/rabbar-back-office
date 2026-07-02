@@ -57,4 +57,10 @@ export const customQueryKey = {
     getAll: 'get-all-payments',
     getById: 'get-payment-by-id',
   },
+  subscriptions: {
+    getByOrg: 'get-organization-subscription',
+  },
+  plans: {
+    getAll: 'get-all-plans',
+  },
 };
