@@ -1,4 +1,7 @@
 export const customQueryKey = {
+  analytics: {
+    overview: 'back-office-analytics-overview',
+  },
   user: {
     getMe: 'get-me',
     getOrganizations: 'get-my-organizations',
