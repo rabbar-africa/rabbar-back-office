@@ -9,6 +9,7 @@ import { ClipboardTextIcon } from '@/assets/custom/ClipboardTextIcon';
 import { ChartBar } from '@/assets/custom/ChartBar';
 import { GearIcon } from '@/assets/custom/GearIcon';
 import { BuildingIcon } from '@/assets/custom/BuildingIcon';
+import { ShieldIcon } from '@/assets/custom/ShieldIcon';
 
 export const sideBarItems = [
   {
@@ -66,6 +67,13 @@ export const sideBarItems = [
     href: RouteConstants.expenses.base.path,
     slug: 'expenses',
     paths: [RouteConstants.expenses.base.path],
+  },
+  {
+    name: 'Access Control',
+    icon: ShieldIcon,
+    href: RouteConstants.access.base.path,
+    slug: 'access-control',
+    paths: [RouteConstants.access.base.path],
   },
   {
     name: 'Reports',

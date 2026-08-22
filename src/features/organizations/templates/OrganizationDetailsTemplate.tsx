@@ -23,6 +23,7 @@ import { OrgItemsTab } from '../components/tabs/OrgItemsTab';
 import { OrgCustomersTab } from '../components/tabs/OrgCustomersTab';
 import { OrgSubscriptionTab } from '../components/tabs/OrgSubscriptionTab';
 import { OrgSettingsTab } from '../components/tabs/OrgSettingsTab';
+import { OrgRolesTab } from '../components/tabs/OrgRolesTab';
 
 const TABS = [
   { value: 'invoices', label: 'Invoices' },
@@ -30,6 +31,7 @@ const TABS = [
   { value: 'items', label: 'Items' },
   { value: 'customers', label: 'Customers' },
   { value: 'subscription', label: 'Subscription' },
+  { value: 'roles', label: 'Roles & Permissions' },
   { value: 'settings', label: 'Settings' },
 ];
 
@@ -139,6 +141,9 @@ export function OrganizationDetailsTemplate() {
           </Tabs.Content>
           <Tabs.Content value="subscription">
             {tab === 'subscription' && <OrgSubscriptionTab />}
+          </Tabs.Content>
+          <Tabs.Content value="roles">
+            {tab === 'roles' && <OrgRolesTab />}
           </Tabs.Content>
           <Tabs.Content value="settings">
             {tab === 'settings' && (

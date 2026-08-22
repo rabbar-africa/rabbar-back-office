@@ -2,6 +2,13 @@ export const customQueryKey = {
   analytics: {
     overview: 'back-office-analytics-overview',
   },
+  access: {
+    catalog: 'permission-catalog',
+    defaultRoles: 'default-role-templates',
+    orgRoles: 'org-roles',
+    orgRole: 'org-role',
+    orgPermissions: 'org-permissions',
+  },
   user: {
     getMe: 'get-me',
     getOrganizations: 'get-my-organizations',
