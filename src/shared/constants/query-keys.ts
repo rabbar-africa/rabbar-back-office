@@ -6,6 +6,10 @@ export const customQueryKey = {
     getMyTeams: 'get-my-teams',
     getAllMyTeams: 'get-all-my-teams',
   },
+  jobCards: {
+    getById: 'get-job-card-by-id',
+    financials: 'job-card-financials',
+  },
 
   roles: {
     getAll: 'get-all-roles',
@@ -49,6 +53,7 @@ export const customQueryKey = {
   invoices: {
     getAll: 'get-all-invoices',
     getById: 'get-invoice-by-id',
+    outstanding: 'outstanding-invoices',
   },
   items: {
     getAll: 'get-all-items',

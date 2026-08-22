@@ -4,8 +4,8 @@ import { useParams } from 'react-router-dom';
 import { CustomTable } from '@/components/table';
 import { SearchInput } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
-import { useGetPayments } from '@/features/payments/api/query';
 import { paymentListColumns } from '@/features/payments/components/payment-columns';
+import { useGetPaymentsQuery } from '@/features/payments/api';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -21,7 +21,7 @@ export function OrgPaymentsTab() {
   });
   const [searchInput, setSearchInput] = useState(filters.search);
 
-  const { data, isPending } = useGetPayments(
+  const { data, isPending } = useGetPaymentsQuery(
     {
       organizationId: id,
       page: filters.page,

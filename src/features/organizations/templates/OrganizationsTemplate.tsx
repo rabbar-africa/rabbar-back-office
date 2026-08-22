@@ -16,8 +16,8 @@ const columns: ColumnDef<IOrganization, any>[] = [
   { accessorKey: 'companyEmail', header: 'Email' },
   { accessorKey: 'phone', header: 'Phone' },
   {
-    accessorKey: 'createdAt',
-    header: 'Created',
+    accessorKey: 'lastActivityDate',
+    header: 'Last Activity',
     cell: ({ getValue }) => (
       <Box>{moment(getValue()).format('DD, MMM,YYYY')} </Box>
     ),

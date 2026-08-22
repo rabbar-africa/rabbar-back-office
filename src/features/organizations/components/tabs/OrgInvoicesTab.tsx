@@ -4,11 +4,8 @@ import { useParams } from 'react-router-dom';
 import { CustomTable } from '@/components/table';
 import { SearchInput } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
-import { useGetInvoices } from '@/features/invoices/api/query';
-import {
-  // STATUS_OPTIONS,
-  useInvoiceListColumns,
-} from '@/features/invoices/components/invoice-columns';
+import { useInvoiceListColumns } from '@/features/invoices/components/invoice-list/columns';
+import { useGetAllInvoicesQuery } from '@/features/invoices/api';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -27,7 +24,7 @@ export function OrgInvoicesTab() {
   });
   const [searchInput, setSearchInput] = useState(filters.search);
 
-  const { data, isPending } = useGetInvoices(
+  const { data, isPending } = useGetAllInvoicesQuery(
     {
       organizationId: id,
       page: filters.page,

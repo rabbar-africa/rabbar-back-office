@@ -25,44 +25,65 @@ interface AddressParts {
   postalCode?: string | null;
 }
 
-/** Join the parts of an address into a single, human-readable line. */
+/** Joins the populated parts of an address into a single comma-separated line. */
 export function formatAddress(address?: AddressParts | null): string {
   if (!address) return '';
 
-  return [
-    address.addressLine1,
-    address.addressLine2,
-    address.city,
-    address.state,
-    address.postalCode,
-    address.country,
-  ]
-    .map((part) => part?.trim())
-    .filter(Boolean)
-    .join(', ');
+  return arrayToCommaString(
+    [
+      address.addressLine1,
+      address.addressLine2,
+      address.city,
+      address.state,
+      address.country,
+      address.postalCode,
+    ].filter((part): part is string => Boolean(part))
+  );
 }
 
 interface TransactionSeriesParts {
-  prefix?: string | null;
-  suffix?: string | null;
-  separator?: string | null;
-  padding?: number | null;
+  prefix?: string;
+  suffix?: string;
+  separator?: string;
+  padding?: number;
   number: number;
 }
 
-/** Build a preview of a transaction number, e.g. `INV-000001-2026`. */
+/**
+ * Builds a sample transaction number from a series config, e.g.
+ * { prefix: "INV", separator: "-", padding: 6, number: 1 } -> "INV-000001".
+ */
 export function formatTransactionSeries({
-  prefix,
-  suffix,
-  separator,
-  padding,
+  prefix = '',
+  suffix = '',
+  separator = '',
+  padding = 0,
   number,
 }: TransactionSeriesParts): string {
-  const sep = separator ?? '';
-  const padded = String(number).padStart(padding ?? 0, '0');
+  const padded = String(Math.max(0, number)).padStart(padding, '0');
 
   return [prefix, padded, suffix]
-    .map((part) => (part ?? '').toString().trim())
-    .filter(Boolean)
-    .join(sep);
+    .filter((part) => part !== '' && part != null)
+    .join(separator);
+}
+
+export function pascalToCapitalized(str?: string | null): string {
+  if (!str || typeof str !== 'string') return '';
+
+  // First, replace underscores with spaces
+  const result = str.replace(/_/g, ' ');
+
+  // Add space at word boundaries:
+  // - Betwe`en lowercase and uppercase letters
+  // - Before the last capital in a sequence of capitals followed by lowercase
+  const withSpaces = result
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')
+    .trim();
+
+  // Capitalize first letter of each word
+  return withSpaces
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
