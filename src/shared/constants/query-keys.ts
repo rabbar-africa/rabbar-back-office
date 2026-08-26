@@ -1,10 +1,29 @@
 export const customQueryKey = {
+  analytics: {
+    overview: 'back-office-analytics-overview',
+  },
+  access: {
+    catalog: 'permission-catalog',
+    defaultRoles: 'default-role-templates',
+    orgRoles: 'org-roles',
+    orgRole: 'org-role',
+    orgPermissions: 'org-permissions',
+  },
   user: {
     getMe: 'get-me',
     getOrganizations: 'get-my-organizations',
     getMyPermissions: 'get-my-permissions',
     getMyTeams: 'get-my-teams',
     getAllMyTeams: 'get-all-my-teams',
+  },
+  jobCards: {
+    getAll: 'get-all-job-cards',
+    getById: 'get-job-card-by-id',
+    financials: 'job-card-financials',
+  },
+  inspections: {
+    getAll: 'get-all-inspections',
+    getById: 'get-inspection-by-id',
   },
 
   roles: {
@@ -49,6 +68,7 @@ export const customQueryKey = {
   invoices: {
     getAll: 'get-all-invoices',
     getById: 'get-invoice-by-id',
+    outstanding: 'outstanding-invoices',
   },
   items: {
     getAll: 'get-all-items',

@@ -36,8 +36,7 @@ const overview = {
 
 const inspection = {
   base: defineRoute('/inspection' as const),
-  inspectionDetails: defineRoute('/inspection/:id' as const),
-  createInspection: defineRoute('/inspection/create' as const),
+  detail: defineRoute('/inspection/:id' as const),
 } as const;
 
 const invoices = {
@@ -58,6 +57,10 @@ const organizations = {
   create: defineRoute('/organizations/create' as const),
   detail: defineRoute('/organizations/:id' as const),
   edit: defineRoute('/organizations/:id/edit' as const),
+} as const;
+
+const access = {
+  base: defineRoute('/access-control' as const),
 } as const;
 
 const customers = {
@@ -157,6 +160,7 @@ export const RouteConstants = {
   invoices,
   payments,
   organizations,
+  access,
   customers,
   items,
   expenses,
