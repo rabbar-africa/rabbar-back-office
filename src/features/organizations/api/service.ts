@@ -1,6 +1,8 @@
 import { axios } from '@/lib/axios';
 import { type ApiResponse } from '@/shared/interface/api';
 import type { IOrganization } from '@/shared/interface/common';
+import type { IInvoiceResponse } from '@/shared/interface/invoice';
+import type { IPaymentReceived } from '@/shared/interface/payment';
 import type {
   IOrgAddress,
   IOrgBankAccount,
@@ -17,6 +19,7 @@ import type {
   UpdateOrganizationPayload,
   UpdateOrgBankAccountPayload,
   IGetOrganizationsFilter,
+  IOrgRecordsFilter,
   IPlan,
   IOrganizationSubscription,
   CreateManualPaymentPayload,
@@ -270,6 +273,41 @@ export const organizationsSubscriptionService = {
     const response = await axios.patch<ApiResponse<IOrganizationSubscription>>(
       `back-office/subscriptions/${id}/reactivate`
     );
+    return response.data;
+  },
+};
+
+/**
+ * One organization's records, read through the back office's cross-tenant
+ * endpoints.
+ *
+ * These must NOT go through the tenant-facing feature services (`/invoices`,
+ * `/payments-received`, …): those take the organization from the caller's JWT
+ * and ignore an `organizationId` query param entirely, so a platform admin —
+ * who has no organizationId — gets every organization's records back
+ * unfiltered. Only the `back-office/*` endpoints accept the organization
+ * explicitly.
+ *
+ * Responses are list projections: a subset of each record's columns plus the
+ * owning `organization`. Enough for the detail tabs; fetch the record itself
+ * for anything more.
+ */
+export const organizationRecordsService = {
+  getInvoices: async (id: string, filter?: IOrgRecordsFilter) => {
+    const url = buildUrlWithQueryParams('back-office/invoices', {
+      ...filter,
+      organizationId: id,
+    });
+    const response = await axios.get<ApiResponse<IInvoiceResponse[]>>(url);
+    return response.data;
+  },
+
+  getPaymentsReceived: async (id: string, filter?: IOrgRecordsFilter) => {
+    const url = buildUrlWithQueryParams('back-office/payments-received', {
+      ...filter,
+      organizationId: id,
+    });
+    const response = await axios.get<ApiResponse<IPaymentReceived[]>>(url);
     return response.data;
   },
 };
