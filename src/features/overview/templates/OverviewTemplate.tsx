@@ -1,43 +1,95 @@
-import { Box, Flex, Heading, SimpleGrid, Text } from '@chakra-ui/react';
-import { overviewStats } from '../data';
+import { Button, Center, Stack, Text } from '@chakra-ui/react';
+import moment from 'moment';
+import { PageHeader } from '@/components/common/PageHeader';
+import { useOverview } from '../components/useOverview';
+import { OverviewFilters } from '../components/OverviewFilters';
+import { OverviewSkeleton } from '../components/OverviewSkeleton';
+import { OverviewContent } from '../components/OverviewContent';
+
+const DAY = 'DD MMM YYYY';
+
+/**
+ * Period caption for the header. Uses the range the API echoed back once it
+ * has replied, and the pending filter values (or the API's own default —
+ * the current month) while it hasn't.
+ */
+function periodCaption(
+  period: { from: string; to: string } | undefined,
+  filters: { from: string; to: string }
+) {
+  if (period) {
+    return `${moment(period.from).format(DAY)} — ${moment(period.to).format(DAY)}`;
+  }
+  if (filters.from || filters.to) {
+    const from = filters.from ? moment(filters.from).format(DAY) : '…';
+    const to = filters.to ? moment(filters.to).format(DAY) : 'today';
+    return `${from} — ${to}`;
+  }
+  return moment().format('MMMM YYYY');
+}
 
 export function OverviewTemplate() {
-  return (
-    <Flex direction="column" gap="1.5rem">
-      <Heading fontSize="1.5rem" fontWeight="600">
-        Dashboard
-      </Heading>
+  const {
+    overview,
+    isLoading,
+    isFetching,
+    isError,
+    refetch,
+    filters,
+    setFilters,
+    activePreset,
+    applyPreset,
+    resetPeriod,
+  } = useOverview();
 
-      <SimpleGrid columns={{ base: 1, sm: 2, lg: 4 }} gap="1rem">
-        {overviewStats.map((stat) => (
-          <Box
-            key={stat.id}
-            bg="white"
-            border="1px solid #EBEBEB"
-            rounded="lg"
-            p="1.25rem"
-          >
-            <Text fontSize=".875rem" color="gray.500">
-              {stat.label}
+  const caption = periodCaption(overview?.period, filters);
+
+  return (
+    <Stack gap="1.5rem">
+      {/* Header and filters render immediately so the period stays adjustable
+          while the figures are still in flight. */}
+      <PageHeader
+        title="Dashboard"
+        subtitle={`Platform overview · ${caption}${
+          isFetching && !isLoading ? ' · refreshing…' : ''
+        }`}
+      />
+
+      <OverviewFilters
+        from={filters.from}
+        to={filters.to}
+        trendMonths={filters.trendMonths}
+        activePreset={activePreset}
+        onPresetChange={applyPreset}
+        onFromChange={(value) => setFilters({ from: value })}
+        onToChange={(value) => setFilters({ to: value })}
+        onTrendMonthsChange={(value) => setFilters({ trendMonths: value })}
+        onReset={resetPeriod}
+      />
+
+      {isLoading ? (
+        <OverviewSkeleton />
+      ) : isError || !overview ? (
+        <Center py="16">
+          <Stack gap="3" align="center">
+            <Text textStyle="small-regular" color="error.300">
+              Couldn&apos;t load the dashboard.
             </Text>
-            <Text fontSize="1.5rem" fontWeight="700" mt=".5rem">
-              {stat.value}
-            </Text>
-            <Flex align="center" gap=".375rem" mt=".5rem">
-              <Text
-                fontSize=".8125rem"
-                fontWeight="600"
-                color={stat.trend === 'up' ? 'success.300' : 'error.300'}
-              >
-                {stat.trend === 'up' ? '▲' : '▼'} {stat.percentage}
-              </Text>
-              <Text fontSize=".8125rem" color="gray.400">
-                {stat.helperText}
-              </Text>
-            </Flex>
-          </Box>
-        ))}
-      </SimpleGrid>
-    </Flex>
+            <Button
+              size="sm"
+              variant="outlineSecondary"
+              onClick={() => refetch()}
+            >
+              Try again
+            </Button>
+          </Stack>
+        </Center>
+      ) : (
+        <OverviewContent
+          overview={overview}
+          trendMonths={filters.trendMonths}
+        />
+      )}
+    </Stack>
   );
 }

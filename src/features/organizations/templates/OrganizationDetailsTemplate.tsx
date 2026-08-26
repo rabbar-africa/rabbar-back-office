@@ -23,13 +23,19 @@ import { OrgItemsTab } from '../components/tabs/OrgItemsTab';
 import { OrgCustomersTab } from '../components/tabs/OrgCustomersTab';
 import { OrgSubscriptionTab } from '../components/tabs/OrgSubscriptionTab';
 import { OrgSettingsTab } from '../components/tabs/OrgSettingsTab';
+import { OrgRolesTab } from '../components/tabs/OrgRolesTab';
+import { OrgInspectionsTab } from '../components/tabs/OrgInspectionsTab';
+import { OrgJobCardsTab } from '../components/tabs/OrgJobCardsTab';
 
 const TABS = [
+  { value: 'inspections', label: 'Inspections' },
+  { value: 'job-cards', label: 'Job Cards' },
   { value: 'invoices', label: 'Invoices' },
   { value: 'payments', label: 'Payments' },
   { value: 'items', label: 'Items' },
   { value: 'customers', label: 'Customers' },
   { value: 'subscription', label: 'Subscription' },
+  { value: 'roles', label: 'Roles & Permissions' },
   { value: 'settings', label: 'Settings' },
 ];
 
@@ -125,6 +131,12 @@ export function OrganizationDetailsTemplate() {
         </Tabs.List>
 
         <Box mt="1.5rem" pb={'3rem'}>
+          <Tabs.Content value="inspections">
+            {tab === 'inspections' && <OrgInspectionsTab />}
+          </Tabs.Content>
+          <Tabs.Content value="job-cards">
+            {tab === 'job-cards' && <OrgJobCardsTab />}
+          </Tabs.Content>
           <Tabs.Content value="invoices">
             {tab === 'invoices' && <OrgInvoicesTab />}
           </Tabs.Content>
@@ -139,6 +151,9 @@ export function OrganizationDetailsTemplate() {
           </Tabs.Content>
           <Tabs.Content value="subscription">
             {tab === 'subscription' && <OrgSubscriptionTab />}
+          </Tabs.Content>
+          <Tabs.Content value="roles">
+            {tab === 'roles' && <OrgRolesTab />}
           </Tabs.Content>
           <Tabs.Content value="settings">
             {tab === 'settings' && (

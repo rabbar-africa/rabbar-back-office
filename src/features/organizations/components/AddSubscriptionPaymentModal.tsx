@@ -68,7 +68,7 @@ export function AddSubscriptionPaymentModal({
       amount: '',
       currency: 'NGN',
       periodStart: moment().format('YYYY-MM-DD'),
-      periodMonths: '12',
+      periodMonths: '1',
       paidAt: moment().format('YYYY-MM-DD'),
       method: 'BANK_TRANSFER',
       reference: '',
