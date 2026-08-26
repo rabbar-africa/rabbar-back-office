@@ -36,8 +36,7 @@ const overview = {
 
 const inspection = {
   base: defineRoute('/inspection' as const),
-  inspectionDetails: defineRoute('/inspection/:id' as const),
-  createInspection: defineRoute('/inspection/create' as const),
+  detail: defineRoute('/inspection/:id' as const),
 } as const;
 
 const invoices = {

@@ -43,6 +43,7 @@ export const getStatusColor = (status: string) => {
   switch (status?.toLowerCase()) {
     case 'active':
     case 'paid':
+    case 'delivered':
     case 'approved':
     case 'verified':
       return {
@@ -59,6 +60,7 @@ export const getStatusColor = (status: string) => {
       };
 
     case 'draft':
+    case 'open':
     case 'system':
     case 'received':
     case 'data collection':
@@ -67,6 +69,9 @@ export const getStatusColor = (status: string) => {
         text: 'primary.300',
       };
     case 'sent':
+    case 'in progress':
+    case 'awaiting approval':
+    case 'awaiting parts':
     case 'partial':
     case 'partially_paid':
     case 'partially paid':

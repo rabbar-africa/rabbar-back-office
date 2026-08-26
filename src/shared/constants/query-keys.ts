@@ -17,8 +17,13 @@ export const customQueryKey = {
     getAllMyTeams: 'get-all-my-teams',
   },
   jobCards: {
+    getAll: 'get-all-job-cards',
     getById: 'get-job-card-by-id',
     financials: 'job-card-financials',
+  },
+  inspections: {
+    getAll: 'get-all-inspections',
+    getById: 'get-inspection-by-id',
   },
 
   roles: {
