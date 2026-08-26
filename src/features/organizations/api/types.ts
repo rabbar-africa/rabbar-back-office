@@ -33,6 +33,15 @@ export interface IGetOrganizationsFilter extends IBaseFilter {
   isActive?: boolean;
 }
 
+/**
+ * Filters for one organization's records on the detail tabs. The organization
+ * itself is passed separately — never as part of the filter — so it can't be
+ * dropped by accident.
+ */
+export interface IOrgRecordsFilter extends Omit<IBaseFilter, 'organizationId'> {
+  status?: string;
+}
+
 /* ── Subscriptions & plans ─────────────────────────────────────────────── */
 
 export interface IPlan {
