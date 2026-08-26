@@ -3,12 +3,13 @@ import type { MutationConfig, QueryConfigType } from '@/lib/react-query';
 import { customQueryKey } from '@/shared/constants/query-keys';
 import {
   organizationsService,
+  organizationRecordsService,
   organizationAddressService,
   organizationBankAccountService,
   organizationTransactionSeriesService,
   organizationsSubscriptionService,
 } from './service';
-import type { IGetOrganizationsFilter } from './types';
+import type { IGetOrganizationsFilter, IOrgRecordsFilter } from './types';
 
 export function useGetOrganizations(
   filter?: IGetOrganizationsFilter,
@@ -381,6 +382,36 @@ export function useReactivateSubscription(
       organizationsSubscriptionService.reactivateCancelledSubscription,
     meta: { successMessage: 'Subscription reactivated' },
     onSuccess: invalidate,
+    ...config,
+  });
+}
+
+/* ── One organization's records (back-office, cross-tenant endpoints) ───── */
+
+export function useGetOrganizationInvoices(
+  id: string,
+  filter?: IOrgRecordsFilter,
+  config?: QueryConfigType<typeof organizationRecordsService.getInvoices>
+) {
+  return useQuery({
+    queryKey: [customQueryKey.organizations.getInvoices, id, filter],
+    queryFn: () => organizationRecordsService.getInvoices(id, filter),
+    enabled: !!id,
+    ...config,
+  });
+}
+
+export function useGetOrganizationPayments(
+  id: string,
+  filter?: IOrgRecordsFilter,
+  config?: QueryConfigType<
+    typeof organizationRecordsService.getPaymentsReceived
+  >
+) {
+  return useQuery({
+    queryKey: [customQueryKey.organizations.getPayments, id, filter],
+    queryFn: () => organizationRecordsService.getPaymentsReceived(id, filter),
+    enabled: !!id,
     ...config,
   });
 }

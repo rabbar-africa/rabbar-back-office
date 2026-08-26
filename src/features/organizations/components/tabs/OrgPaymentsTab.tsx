@@ -5,7 +5,7 @@ import { CustomTable } from '@/components/table';
 import { SearchInput } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
 import { paymentListColumns } from '@/features/payments/components/payment-columns';
-import { useGetPaymentsQuery } from '@/features/payments/api';
+import { useGetOrganizationPayments } from '../../api/query';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -21,15 +21,14 @@ export function OrgPaymentsTab() {
   });
   const [searchInput, setSearchInput] = useState(filters.search);
 
-  const { data, isPending } = useGetPaymentsQuery(
-    {
-      organizationId: id,
-      page: filters.page,
-      limit: filters.limit,
-      ...(filters.search ? { search: filters.search } : {}),
-    },
-    { enabled: !!id }
-  );
+  // Reads through the back office's cross-tenant endpoint — the tenant
+  // `/payments-received` route takes the org from the JWT and would return
+  // every organization's payments to a platform admin.
+  const { data, isPending } = useGetOrganizationPayments(id ?? '', {
+    page: filters.page,
+    limit: filters.limit,
+    ...(filters.search ? { search: filters.search } : {}),
+  });
 
   const payments = data?.data || [];
   const meta = data?.meta;

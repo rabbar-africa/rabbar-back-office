@@ -5,7 +5,7 @@ import { CustomTable } from '@/components/table';
 import { SearchInput } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
 import { useInvoiceListColumns } from '@/features/invoices/components/invoice-list/columns';
-import { useGetAllInvoicesQuery } from '@/features/invoices/api';
+import { useGetOrganizationInvoices } from '../../api/query';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -24,16 +24,15 @@ export function OrgInvoicesTab() {
   });
   const [searchInput, setSearchInput] = useState(filters.search);
 
-  const { data, isPending } = useGetAllInvoicesQuery(
-    {
-      organizationId: id,
-      page: filters.page,
-      limit: filters.limit,
-      ...(filters.search ? { search: filters.search } : {}),
-      ...(filters.status ? { status: filters.status } : {}),
-    },
-    { enabled: !!id }
-  );
+  // Reads through the back office's cross-tenant endpoint — the tenant
+  // `/invoices` route takes the org from the JWT and would return every
+  // organization's invoices to a platform admin.
+  const { data, isPending } = useGetOrganizationInvoices(id ?? '', {
+    page: filters.page,
+    limit: filters.limit,
+    ...(filters.search ? { search: filters.search } : {}),
+    ...(filters.status ? { status: filters.status } : {}),
+  });
 
   const invoices = data?.data || [];
   const meta = data?.meta;
