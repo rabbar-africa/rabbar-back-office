@@ -59,6 +59,15 @@ const organizations = {
   edit: defineRoute('/organizations/:id/edit' as const),
 } as const;
 
+const billing = {
+  base: defineRoute('/billing' as const),
+} as const;
+
+const promoCodes = {
+  base: defineRoute('/promo-codes' as const),
+  detail: defineRoute('/promo-codes/:id' as const),
+} as const;
+
 const access = {
   base: defineRoute('/access-control' as const),
 } as const;
@@ -160,6 +169,8 @@ export const RouteConstants = {
   invoices,
   payments,
   organizations,
+  billing,
+  promoCodes,
   access,
   customers,
   items,

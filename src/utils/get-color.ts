@@ -76,6 +76,7 @@ export const getStatusColor = (status: string) => {
     case 'partially_paid':
     case 'partially paid':
     case 'pending':
+    case 'payment due':
     case 'medium':
     case 'in review':
     case 'pending approval':
@@ -101,6 +102,7 @@ export const getStatusColor = (status: string) => {
     case 'overdue':
     case 'void':
     case 'cancelled':
+    case 'expired':
     case 'written_off':
     case 'written off':
     case 'closed':

@@ -1,7 +1,8 @@
 import { Box, Flex, Stack, Text } from '@chakra-ui/react';
 import Status from '@/components/ui/Status';
-import { pascalToCapitalized } from '@/utils/string-formatter';
+import { subscriptionStatusLabel } from '@/shared/constants/subscription';
 import type { IOverviewSubscriptions } from '@/shared/interface/overview';
+import { RunBillingButton } from '@/features/billing/components/RunBillingButton';
 import { SectionCard } from './SectionCard';
 
 interface SubscriptionsPanelProps {
@@ -17,6 +18,7 @@ export function SubscriptionsPanel({ subscriptions }: SubscriptionsPanelProps) {
     <SectionCard
       title="Subscriptions"
       subtitle={`${totalSubs} subscription${totalSubs === 1 ? '' : 's'} across all organizations`}
+      action={<RunBillingButton />}
     >
       {totalSubs === 0 ? (
         <Text textStyle="small-regular" color="gray.300" py="2">
@@ -32,7 +34,7 @@ export function SubscriptionsPanel({ subscriptions }: SubscriptionsPanelProps) {
               {byStatus.map((entry) => (
                 <Flex key={entry.status} align="center" gap=".375rem">
                   <Status
-                    name={pascalToCapitalized(entry.status)}
+                    name={subscriptionStatusLabel(entry.status)}
                     px=".5rem"
                     w="auto"
                     minW="4.5rem"
