@@ -311,12 +311,15 @@ export function useDeleteOrganizationTransactionSeries(
 
 /* ── Subscription & plans ──────────────────────────────────────────────── */
 
+/** Per-org changes also show up in the billing page's list and ledger. */
 function useInvalidateSubscription() {
   const queryClient = useQueryClient();
   return () =>
-    queryClient.invalidateQueries({
-      queryKey: [customQueryKey.subscriptions.getByOrg],
-    });
+    [
+      customQueryKey.subscriptions.getByOrg,
+      customQueryKey.subscriptions.getAll,
+      customQueryKey.subscriptions.payments,
+    ].forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
 }
 
 export function useGetOrganizationSubscription(
@@ -381,6 +384,18 @@ export function useReactivateSubscription(
     mutationFn:
       organizationsSubscriptionService.reactivateCancelledSubscription,
     meta: { successMessage: 'Subscription reactivated' },
+    onSuccess: invalidate,
+    ...config,
+  });
+}
+
+export function useChangeSubscriptionPlan(
+  config?: MutationConfig<typeof organizationsSubscriptionService.changePlan>
+) {
+  const invalidate = useInvalidateSubscription();
+  return useMutation({
+    mutationFn: organizationsSubscriptionService.changePlan,
+    meta: { successMessage: 'Plan changed' },
     onSuccess: invalidate,
     ...config,
   });

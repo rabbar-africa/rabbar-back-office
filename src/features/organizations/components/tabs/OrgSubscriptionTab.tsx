@@ -8,13 +8,19 @@ import SectionLoader from '@/components/common/SectionLoader';
 import ConsentDialog from '@/components/common/ConsentDialog';
 import { CustomTable } from '@/components/table';
 import { formatAmount } from '@/utils/format-number';
+import {
+  subscriptionPaymentMethodLabel,
+  subscriptionStatusLabel,
+} from '@/shared/constants/subscription';
 import type { ISubscriptionPayment } from '../../api/types';
 import {
   useGetOrganizationSubscription,
   useCancelSubscription,
   useReactivateSubscription,
+  useGetPlans,
 } from '../../api/query';
 import { AddSubscriptionPaymentModal } from '../AddSubscriptionPaymentModal';
+import { ChangePlanModal } from '../ChangePlanModal';
 
 const CANCELLED_STATES = ['cancelled', 'canceled', 'expired', 'inactive'];
 
@@ -30,8 +36,20 @@ const paymentColumns: ColumnDef<ISubscriptionPayment, any>[] = [
   {
     accessorKey: 'amount',
     header: 'Amount',
-    cell: ({ row }) =>
-      formatAmount(Number(row.original.amount ?? 0), row.original.currency),
+    cell: ({ row }) => {
+      const { amount, discountAmount, currency } = row.original;
+      const discount = Number(discountAmount ?? 0);
+      return (
+        <Box>
+          <Text>{formatAmount(Number(amount ?? 0), currency)}</Text>
+          {discount > 0 && (
+            <Text fontSize=".75rem" color="success.300">
+              {formatAmount(discount, currency)} discount
+            </Text>
+          )}
+        </Box>
+      );
+    },
   },
   {
     id: 'period',
@@ -41,7 +59,11 @@ const paymentColumns: ColumnDef<ISubscriptionPayment, any>[] = [
         row.original.periodEnd
       ).format('DD MMM YYYY')}`,
   },
-  { accessorKey: 'method', header: 'Method' },
+  {
+    accessorKey: 'method',
+    header: 'Method',
+    cell: ({ getValue }) => subscriptionPaymentMethodLabel(getValue()),
+  },
   {
     accessorKey: 'reference',
     header: 'Reference',
@@ -52,10 +74,18 @@ const paymentColumns: ColumnDef<ISubscriptionPayment, any>[] = [
 export function OrgSubscriptionTab() {
   const { id } = useParams<{ id: string }>();
   const [payOpen, setPayOpen] = useState(false);
+  const [planOpen, setPlanOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
 
   const { data, isPending } = useGetOrganizationSubscription(id!);
   const subscription = data?.data;
+  // Only needed to name a pending (scheduled) plan; cached across the app.
+  const { data: plansData } = useGetPlans({
+    enabled: Boolean(subscription?.pendingPlanId),
+  });
+  const pendingPlan = plansData?.data?.find(
+    (plan) => plan.id === subscription?.pendingPlanId
+  );
 
   const cancelMutation = useCancelSubscription();
   const reactivateMutation = useReactivateSubscription();
@@ -65,6 +95,19 @@ export function OrgSubscriptionTab() {
   const status = subscription?.status?.toLowerCase() ?? '';
   const isCancelled = CANCELLED_STATES.includes(status);
   const plan = subscription?.plan;
+  const isPaidPlan = Number(plan?.monthlyPrice ?? 0) > 0;
+
+  const atPeriodEnd = !subscription
+    ? '—'
+    : subscription.cancelAtPeriodEnd
+      ? 'Cancels — drops to Starter'
+      : subscription.pendingPlanId
+        ? `Switches to ${pendingPlan?.name ?? 'another plan'}`
+        : !isPaidPlan
+          ? '—'
+          : subscription.autoRenew
+            ? 'Renews automatically (saved card)'
+            : 'Renews when paid';
 
   const rows = subscription
     ? [
@@ -95,6 +138,31 @@ export function OrgSubscriptionTab() {
             ? moment(subscription.currentPeriodEnd).format('DD MMM YYYY')
             : '—',
         },
+        ...(subscription.status === 'PAST_DUE' && subscription.pastDueSince
+          ? [
+              {
+                label: 'Payment Due Since',
+                value: moment(subscription.pastDueSince).format('DD MMM YYYY'),
+              },
+            ]
+          : []),
+        { label: 'At Period End', value: atPeriodEnd },
+        {
+          label: 'Auto-renew',
+          value: !isPaidPlan ? '—' : subscription.autoRenew ? 'On' : 'Off',
+        },
+        ...((subscription.failedChargeAttempts ?? 0) > 0
+          ? [
+              {
+                label: 'Failed Card Charges',
+                value: subscription.nextChargeAttemptAt
+                  ? `${subscription.failedChargeAttempts} — next try ${moment(
+                      subscription.nextChargeAttemptAt
+                    ).format('DD MMM YYYY')}`
+                  : String(subscription.failedChargeAttempts),
+              },
+            ]
+          : []),
         {
           label: 'Cancelled At',
           value: subscription.cancelledAt
@@ -118,7 +186,9 @@ export function OrgSubscriptionTab() {
             <Text fontSize="1.125rem" fontWeight="600">
               Subscription
             </Text>
-            {subscription && <Status name={subscription.status} />}
+            {subscription && (
+              <Status name={subscriptionStatusLabel(subscription.status)} />
+            )}
           </Flex>
 
           <Flex gap=".75rem" wrap="wrap">
@@ -130,6 +200,12 @@ export function OrgSubscriptionTab() {
             >
               Add Payment
             </Button>
+
+            {subscription && (
+              <Button variant="outline" onClick={() => setPlanOpen(true)}>
+                Change Plan
+              </Button>
+            )}
 
             {subscription && !isCancelled && (
               <Button
@@ -202,6 +278,13 @@ export function OrgSubscriptionTab() {
         orgId={id!}
       />
 
+      <ChangePlanModal
+        open={planOpen}
+        onOpenChange={({ open }) => setPlanOpen(open)}
+        orgId={id!}
+        currentTier={plan?.tier}
+      />
+
       <ConsentDialog
         open={cancelOpen}
         onOpenChange={({ open }) => setCancelOpen(open)}
@@ -212,7 +295,7 @@ export function OrgSubscriptionTab() {
         }
         isLoading={cancelMutation.isPending}
         heading="Cancel subscription?"
-        note="This organization will lose access to paid features at the end of the current billing period."
+        note="The subscription is marked cancelled right away and the organization drops to the free Starter plan until it's reactivated or a new payment is recorded."
         confirmText="Yes, Cancel"
         cancelText="Keep Subscription"
         variant="danger"

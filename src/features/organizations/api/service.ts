@@ -23,6 +23,7 @@ import type {
   IPlan,
   IOrganizationSubscription,
   CreateManualPaymentPayload,
+  ChangePlanPayload,
 } from './types';
 
 const BASE_PATH = 'back-office/organizations';
@@ -270,8 +271,20 @@ export const organizationsSubscriptionService = {
   },
 
   reactivateCancelledSubscription: async (id: string) => {
-    const response = await axios.patch<ApiResponse<IOrganizationSubscription>>(
+    const response = await axios.post<ApiResponse<IOrganizationSubscription>>(
       `back-office/subscriptions/${id}/reactivate`
+    );
+    return response.data;
+  },
+
+  /**
+   * Switch the plan without recording a payment (a manual upgrade, or a
+   * downgrade to Starter). Downgrading to Starter clears the paid period.
+   */
+  changePlan: async (data: { id: string; payload: ChangePlanPayload }) => {
+    const response = await axios.patch<ApiResponse<IOrganizationSubscription>>(
+      `back-office/subscriptions/${data.id}/plan`,
+      data.payload
     );
     return response.data;
   },
