@@ -62,10 +62,13 @@ export interface ISubscriptionPayment {
   subscriptionId: string;
   planId: string;
   amount: string;
+  /** Promo discount taken off this payment (decimal string); "0" when none. */
+  discountAmount?: string | null;
   currency: string;
   periodStart: string;
   periodEnd: string;
   paidAt: string;
+  /** e.g. PAYSTACK_CARD, PAYSTACK_BANK_TRANSFER, PAYSTACK_USSD, PROMO, BANK_TRANSFER. */
   method: string;
   reference: string;
   note: string;
@@ -82,7 +85,18 @@ export interface IOrganizationSubscription {
   id: string;
   organizationId: string;
   planId: string;
+  /** ACTIVE | PAST_DUE | EXPIRED | CANCELLED | INACTIVE */
   status: string;
+  /** When the period ended unpaid (PAST_DUE only). */
+  pastDueSince?: string | null;
+  /** Charge the saved card automatically when the period ends. */
+  autoRenew?: boolean;
+  /** The org asked to stop: drops to Starter when the period ends. */
+  cancelAtPeriodEnd?: boolean;
+  /** A cheaper paid plan to switch to when the period ends. */
+  pendingPlanId?: string | null;
+  failedChargeAttempts?: number;
+  nextChargeAttemptAt?: string | null;
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
   startedAt: string | null;
@@ -97,6 +111,13 @@ export interface IOrganizationSubscription {
     companyEmail: string;
   };
   payments: ISubscriptionPayment[];
+}
+
+/** PATCH back-office/subscriptions/:organizationId/plan — no payment is recorded. */
+export interface ChangePlanPayload {
+  planTier: string;
+  /** Optional context recorded with the change. */
+  note?: string;
 }
 
 export interface CreateManualPaymentPayload {

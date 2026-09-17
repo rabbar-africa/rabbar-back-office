@@ -10,6 +10,8 @@ import { ChartBar } from '@/assets/custom/ChartBar';
 import { GearIcon } from '@/assets/custom/GearIcon';
 import { BuildingIcon } from '@/assets/custom/BuildingIcon';
 import { ShieldIcon } from '@/assets/custom/ShieldIcon';
+import { TagIcon } from '@/assets/custom/TagIcon';
+import { CalendarDotsIcon } from '@/assets/custom/CalendarDotsIcon';
 
 export const sideBarItems = [
   {
@@ -25,6 +27,20 @@ export const sideBarItems = [
     href: RouteConstants.organizations.base.path,
     slug: 'organizations',
     paths: [RouteConstants.organizations.base.path],
+  },
+  {
+    name: 'Billing',
+    icon: CalendarDotsIcon,
+    href: RouteConstants.billing.base.path,
+    slug: 'billing',
+    paths: [RouteConstants.billing.base.path],
+  },
+  {
+    name: 'Promo Codes',
+    icon: TagIcon,
+    href: RouteConstants.promoCodes.base.path,
+    slug: 'promo-codes',
+    paths: [RouteConstants.promoCodes.base.path],
   },
   {
     name: 'Inspection',
