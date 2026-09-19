@@ -12,6 +12,7 @@ import { BuildingIcon } from '@/assets/custom/BuildingIcon';
 import { ShieldIcon } from '@/assets/custom/ShieldIcon';
 import { TagIcon } from '@/assets/custom/TagIcon';
 import { CalendarDotsIcon } from '@/assets/custom/CalendarDotsIcon';
+import { ChatCircle } from '@/assets/custom/ChatCircle';
 
 export const sideBarItems = [
   {
@@ -41,6 +42,13 @@ export const sideBarItems = [
     href: RouteConstants.promoCodes.base.path,
     slug: 'promo-codes',
     paths: [RouteConstants.promoCodes.base.path],
+  },
+  {
+    name: 'WhatsApp Bot',
+    icon: ChatCircle,
+    href: RouteConstants.whatsapp.base.path,
+    slug: 'whatsapp',
+    paths: [RouteConstants.whatsapp.base.path],
   },
   {
     name: 'Inspection',
