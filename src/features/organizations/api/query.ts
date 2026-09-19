@@ -60,14 +60,37 @@ export function useUpdateOrganization(
   });
 }
 
-export function useDeleteOrganization(
-  config?: MutationConfig<typeof organizationsService.remove>
+/** Step 1 of deleting an organization: email the confirmation code. */
+export function useRequestOrganizationDeletion(
+  config?: MutationConfig<typeof organizationsService.requestDeletion>
 ) {
   return useMutation({
-    mutationFn: organizationsService.remove,
-    meta: {
-      successMessage: 'Organization deleted successfully',
-      invalidatesQuery: [customQueryKey.organizations.getAll],
+    mutationFn: organizationsService.requestDeletion,
+    ...config,
+  });
+}
+
+/**
+ * Step 2: the irreversible delete. The organization disappears from every
+ * cross-org view, so refresh those and drop its own cached queries.
+ */
+export function useConfirmOrganizationDeletion(
+  config?: MutationConfig<typeof organizationsService.confirmDeletion>
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: organizationsService.confirmDeletion,
+    meta: { successMessage: 'Organization permanently deleted' },
+    onSuccess: (_data, { id }) => {
+      queryClient.removeQueries({
+        queryKey: [customQueryKey.organizations.getById, id],
+      });
+      [
+        customQueryKey.organizations.getAll,
+        customQueryKey.subscriptions.getAll,
+        customQueryKey.subscriptions.payments,
+        customQueryKey.analytics.overview,
+      ].forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
     },
     ...config,
   });

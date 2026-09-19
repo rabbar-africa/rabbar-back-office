@@ -92,4 +92,10 @@ export const customQueryKey = {
     getAll: 'get-all-promo-codes',
     getById: 'get-promo-code-by-id',
   },
+  whatsapp: {
+    usage: 'get-whatsapp-usage',
+    activity: 'get-whatsapp-activity',
+    people: 'get-whatsapp-people',
+    conversation: 'get-whatsapp-conversation',
+  },
 };

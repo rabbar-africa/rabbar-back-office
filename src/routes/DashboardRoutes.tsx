@@ -9,6 +9,7 @@ import { PaymentRoutes } from '@/features/payments/routes';
 import { OrganizationRoutes } from '@/features/organizations/routes';
 import { BillingRoutes } from '@/features/billing/routes';
 import { PromoCodeRoutes } from '@/features/promo-codes/routes';
+import { WhatsappRoutes } from '@/features/whatsapp/routes';
 import { AccessRoutes } from '@/features/access/routes';
 import { CustomerRoutes } from '@/features/customers/routes';
 import { ItemRoutes } from '@/features/items/routes';
@@ -46,6 +47,7 @@ export const DashboardRoutes: RouteObject = {
     ...OrganizationRoutes,
     ...BillingRoutes,
     ...PromoCodeRoutes,
+    ...WhatsappRoutes,
     ...CustomerRoutes,
     ...ItemRoutes,
     ...ExpenseRoutes,

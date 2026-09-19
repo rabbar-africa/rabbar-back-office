@@ -42,6 +42,7 @@ export const getVerificationAccordionColor = (name: string): string => {
 export const getStatusColor = (status: string) => {
   switch (status?.toLowerCase()) {
     case 'active':
+    case 'handled':
     case 'paid':
     case 'delivered':
     case 'approved':
@@ -62,6 +63,7 @@ export const getStatusColor = (status: string) => {
     case 'draft':
     case 'open':
     case 'system':
+    case 'admin':
     case 'received':
     case 'data collection':
       return {
@@ -77,6 +79,10 @@ export const getStatusColor = (status: string) => {
     case 'partially paid':
     case 'pending':
     case 'payment due':
+    case 'not linked':
+    case 'unsupported':
+    case 'rate limited':
+    case 'late':
     case 'medium':
     case 'in review':
     case 'pending approval':

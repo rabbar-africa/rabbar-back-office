@@ -24,6 +24,9 @@ import type {
   IOrganizationSubscription,
   CreateManualPaymentPayload,
   ChangePlanPayload,
+  ConfirmOrganizationDeletionPayload,
+  IOrganizationDeletionRequest,
+  IOrganizationDeletionResult,
 } from './types';
 
 const BASE_PATH = 'back-office/organizations';
@@ -61,10 +64,31 @@ export const organizationsService = {
     return response.data;
   },
 
-  remove: async (id: string) => {
-    const response = await axios.delete<ApiResponse<null>>(
-      `${BASE_PATH}/${id}`
-    );
+  /**
+   * Step 1 of permanently deleting an organization: emails a 6-digit code to
+   * the requesting platform admin and returns what would be removed.
+   */
+  requestDeletion: async (id: string) => {
+    const response = await axios.post<
+      ApiResponse<IOrganizationDeletionRequest>
+    >(`${BASE_PATH}/${id}/deletion-request`);
+    return response.data;
+  },
+
+  /**
+   * Step 2: HARD DELETE, irreversible. Needs the emailed code and the
+   * organization's exact name.
+   */
+  confirmDeletion: async ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: ConfirmOrganizationDeletionPayload;
+  }) => {
+    const response = await axios.delete<
+      ApiResponse<IOrganizationDeletionResult>
+    >(`${BASE_PATH}/${id}`, { data: payload });
     return response.data;
   },
 

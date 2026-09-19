@@ -68,6 +68,10 @@ const promoCodes = {
   detail: defineRoute('/promo-codes/:id' as const),
 } as const;
 
+const whatsapp = {
+  base: defineRoute('/whatsapp' as const),
+} as const;
+
 const access = {
   base: defineRoute('/access-control' as const),
 } as const;
@@ -171,6 +175,7 @@ export const RouteConstants = {
   organizations,
   billing,
   promoCodes,
+  whatsapp,
   access,
   customers,
   items,
