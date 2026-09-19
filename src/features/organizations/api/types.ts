@@ -42,6 +42,45 @@ export interface IOrgRecordsFilter extends Omit<IBaseFilter, 'organizationId'> {
   status?: string;
 }
 
+/* ── Permanent deletion ────────────────────────────────────────────────── */
+
+/** Record counts that go with the organization. */
+export interface IOrganizationDeletionSummary {
+  users: number;
+  customers: number;
+  vehicles: number;
+  invoices: number;
+  paymentsReceived: number;
+  jobCards: number;
+  inspections: number;
+  expenses: number;
+}
+
+/** Step 1 (POST :id/deletion-request): a code was emailed to the requesting admin. */
+export interface IOrganizationDeletionRequest {
+  requestId: string;
+  organization: { id: string; name: string; slug: string };
+  /** Masked address the code went to, e.g. "ay*****@rabbar.africa". */
+  sentTo: string;
+  expiresAt: string;
+  expiresInMinutes: number;
+  willDelete: IOrganizationDeletionSummary;
+}
+
+/** Step 2 (DELETE :id): the emailed code plus the organization's exact name. */
+export interface ConfirmOrganizationDeletionPayload {
+  otp: string;
+  confirmName: string;
+}
+
+export interface IOrganizationDeletionResult {
+  deleted: boolean;
+  organization: { id: string; name: string; slug: string };
+  removed: IOrganizationDeletionSummary;
+  /** Reference for the audit trail. */
+  auditId: string;
+}
+
 /* ── Subscriptions & plans ─────────────────────────────────────────────── */
 
 export interface IPlan {

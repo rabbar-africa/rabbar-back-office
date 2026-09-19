@@ -8,12 +8,12 @@ import {
   Portal,
   Text,
 } from '@chakra-ui/react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Tabs } from '@chakra-ui/react';
 import { ArrowLeft } from '@/assets/custom';
 import Status from '@/components/common/Status';
 import SectionLoader from '@/components/common/SectionLoader';
-import { TabsTrigger } from '@/components/common/Tabs';
 import { RouteConstants } from '@/shared/constants/routes';
 import { useUrlState } from '@/hooks/useUrlState';
 import { useGetOrganizationById } from '../api/query';
@@ -26,18 +26,12 @@ import { OrgSettingsTab } from '../components/tabs/OrgSettingsTab';
 import { OrgRolesTab } from '../components/tabs/OrgRolesTab';
 import { OrgInspectionsTab } from '../components/tabs/OrgInspectionsTab';
 import { OrgJobCardsTab } from '../components/tabs/OrgJobCardsTab';
-
-const TABS = [
-  { value: 'inspections', label: 'Inspections' },
-  { value: 'job-cards', label: 'Job Cards' },
-  { value: 'invoices', label: 'Invoices' },
-  { value: 'payments', label: 'Payments' },
-  { value: 'items', label: 'Items' },
-  { value: 'customers', label: 'Customers' },
-  { value: 'subscription', label: 'Subscription' },
-  { value: 'roles', label: 'Roles & Permissions' },
-  { value: 'settings', label: 'Settings' },
-];
+import { OrgWhatsappTab } from '../components/tabs/OrgWhatsappTab';
+import { DeleteOrganizationModal } from '../components/DeleteOrganizationModal';
+import {
+  ORG_DETAIL_TABS,
+  OrgDetailsTabBar,
+} from '../components/OrgDetailsTabBar';
 
 const TAB_SCHEMA = { tab: { defaultValue: 'invoices' } };
 
@@ -45,6 +39,12 @@ export function OrganizationDetailsTemplate() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const [{ tab }, setUrlState] = useUrlState(TAB_SCHEMA, { replace: true });
+  // An unknown ?tab= (old link, typo) falls back instead of showing nothing.
+  const activeTab = ORG_DETAIL_TABS.some((t) => t.value === tab)
+    ? tab
+    : TAB_SCHEMA.tab.defaultValue;
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const { data, isPending } = useGetOrganizationById(id!);
   const org = data?.data;
@@ -106,6 +106,14 @@ export function OrganizationDetailsTemplate() {
                 <Menu.Item value="update" onClick={goToEdit}>
                   Update Organization
                 </Menu.Item>
+                <Menu.Item
+                  value="delete"
+                  color="error.300"
+                  _hover={{ bg: 'error.50', color: 'error.300' }}
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  Delete Organization
+                </Menu.Item>
               </Menu.Content>
             </Menu.Positioner>
           </Portal>
@@ -113,55 +121,62 @@ export function OrganizationDetailsTemplate() {
       </Flex>
 
       <Tabs.Root
-        value={tab}
+        value={activeTab}
         onValueChange={(e) => setUrlState({ tab: e.value })}
         variant="plain"
       >
-        <Tabs.List
-          bg="white"
-          rounded="md"
-          p="1"
-          gap="1"
-          border="1px solid #EBEBEB"
-          overflowX="auto"
-        >
-          {TABS.map((t) => (
-            <TabsTrigger key={t.value} value={t.value} label={t.label} />
-          ))}
-        </Tabs.List>
+        <OrgDetailsTabBar
+          value={activeTab}
+          onChange={(value) => setUrlState({ tab: value })}
+        />
 
         <Box mt="1.5rem" pb={'3rem'}>
           <Tabs.Content value="inspections">
-            {tab === 'inspections' && <OrgInspectionsTab />}
+            {activeTab === 'inspections' && <OrgInspectionsTab />}
           </Tabs.Content>
           <Tabs.Content value="job-cards">
-            {tab === 'job-cards' && <OrgJobCardsTab />}
+            {activeTab === 'job-cards' && <OrgJobCardsTab />}
           </Tabs.Content>
           <Tabs.Content value="invoices">
-            {tab === 'invoices' && <OrgInvoicesTab />}
+            {activeTab === 'invoices' && <OrgInvoicesTab />}
           </Tabs.Content>
           <Tabs.Content value="payments">
-            {tab === 'payments' && <OrgPaymentsTab />}
+            {activeTab === 'payments' && <OrgPaymentsTab />}
           </Tabs.Content>
           <Tabs.Content value="items">
-            {tab === 'items' && <OrgItemsTab />}
+            {activeTab === 'items' && <OrgItemsTab />}
           </Tabs.Content>
           <Tabs.Content value="customers">
-            {tab === 'customers' && <OrgCustomersTab />}
+            {activeTab === 'customers' && <OrgCustomersTab />}
           </Tabs.Content>
           <Tabs.Content value="subscription">
-            {tab === 'subscription' && <OrgSubscriptionTab />}
+            {activeTab === 'subscription' && <OrgSubscriptionTab />}
+          </Tabs.Content>
+          <Tabs.Content value="whatsapp">
+            {activeTab === 'whatsapp' && <OrgWhatsappTab />}
           </Tabs.Content>
           <Tabs.Content value="roles">
-            {tab === 'roles' && <OrgRolesTab />}
+            {activeTab === 'roles' && <OrgRolesTab />}
           </Tabs.Content>
           <Tabs.Content value="settings">
-            {tab === 'settings' && (
+            {activeTab === 'settings' && (
               <OrgSettingsTab org={org} onEdit={goToEdit} />
             )}
           </Tabs.Content>
         </Box>
       </Tabs.Root>
+
+      {org && (
+        <DeleteOrganizationModal
+          open={deleteOpen}
+          onOpenChange={({ open }) => setDeleteOpen(open)}
+          orgId={id!}
+          orgName={org.name}
+          onDeleted={() =>
+            navigate(RouteConstants.organizations.base.path, { replace: true })
+          }
+        />
+      )}
     </Flex>
   );
 }
