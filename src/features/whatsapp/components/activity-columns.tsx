@@ -4,6 +4,7 @@ import Status from '@/components/common/Status';
 import type { IWhatsappEvent } from '@/shared/interface/whatsapp';
 import {
   formatDuration,
+  formatNaira,
   formatRelative,
   formatWhen,
   whatTheySent,
@@ -131,6 +132,25 @@ export function buildActivityColumns({
               </Text>
             )}
           </Box>
+        );
+      },
+    },
+    {
+      id: 'aiCost',
+      header: 'AI cost',
+      // The API can't order by cost yet; AI calls is the closest sort.
+      enableSorting: false,
+      cell: ({ row }) => {
+        const cost = row.original.ai?.costNgn ?? 0;
+        return (
+          <Text
+            fontSize="12px"
+            color={cost > 0 ? 'gray.500' : 'gray.300'}
+            fontWeight={cost > 0 ? '500' : '400'}
+            whiteSpace="nowrap"
+          >
+            {cost > 0 ? formatNaira(cost) : '—'}
+          </Text>
         );
       },
     },

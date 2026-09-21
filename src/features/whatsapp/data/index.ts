@@ -191,11 +191,18 @@ export const formatPercent = (part: number, whole: number) =>
     ? `${((part / whole) * 100).toFixed(part / whole < 0.1 ? 1 : 0)}%`
     : '0%';
 
-export const formatUsd = (amount: number) =>
-  `$${amount.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: amount < 1 ? 4 : 2,
+/**
+ * "₦1,880" / "₦0.42". One message costs kobo, so small amounts keep their
+ * decimals. The API does the dollar → naira conversion; never convert here.
+ */
+export const formatNaira = (amount?: number | null) => {
+  const value = amount ?? 0;
+  const decimals = value < 100 ? 2 : 0;
+  return `₦${value.toLocaleString('en-NG', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   })}`;
+};
 
 /** Every day between the bounds, so quiet days show as zero instead of vanishing. */
 export function fillDays(
