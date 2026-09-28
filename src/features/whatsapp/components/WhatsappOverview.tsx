@@ -14,7 +14,7 @@ import {
   fillDays,
   formatDuration,
   formatPercent,
-  formatUsd,
+  formatNaira,
   formatWhen,
   resolvePeriod,
   whatsappFlowLabel,
@@ -169,8 +169,16 @@ export function WhatsappOverview({ onDrillDown }: WhatsappOverviewProps) {
                 />
                 <StatCard
                   label="AI cost (estimate)"
-                  value={formatUsd(usage.ai.estimatedCostUsd)}
-                  helperText={`${usage.ai.calls.toLocaleString()} calls · ${(usage.ai.inputTokens + usage.ai.outputTokens).toLocaleString()} tokens`}
+                  value={formatNaira(usage.ai.estimatedCostNgn)}
+                  helperText={[
+                    `${usage.ai.calls.toLocaleString()} calls`,
+                    `${(usage.ai.inputTokens + usage.ai.outputTokens).toLocaleString()} tokens`,
+                    usage.pricing
+                      ? `at ${formatNaira(usage.pricing.usdToNgn)} per $1`
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                 />
                 <StatCard
                   label="Queue right now"

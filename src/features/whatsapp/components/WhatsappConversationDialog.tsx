@@ -15,6 +15,7 @@ import type { IWhatsappEvent } from '@/shared/interface/whatsapp';
 import { useGetWhatsappConversation } from '../api';
 import {
   formatDay,
+  formatNaira,
   whatTheySent,
   whatsappOutcomeLabel,
   whoName,
@@ -209,6 +210,11 @@ function Exchange({ event }: { event: IWhatsappEvent }) {
         >
           {event.summary}
         </Text>
+        {(event.ai?.costNgn ?? 0) > 0 && (
+          <Text fontSize="11px" color="gray.300" whiteSpace="nowrap">
+            · AI {formatNaira(event.ai.costNgn)}
+          </Text>
+        )}
         {event.outcome !== 'handled' && (
           <Status
             name={whatsappOutcomeLabel(event.outcome)}

@@ -52,7 +52,13 @@ export interface IWhatsappEvent {
   outcome: WhatsappOutcome | string;
   error: string | null;
   flow: { before: string | null; after: string | null };
-  ai: { calls: number; inputTokens: number; outputTokens: number };
+  ai: {
+    calls: number;
+    inputTokens: number;
+    outputTokens: number;
+    /** What this one message cost in naira; 0 when no AI was used. */
+    costNgn: number;
+  };
   durationMs: number | null;
 }
 
@@ -135,8 +141,11 @@ export interface IWhatsappUsage {
     calls: number;
     inputTokens: number;
     outputTokens: number;
-    estimatedCostUsd: number;
+    /** Naira, worked out by the API with the rates in `pricing`. */
+    estimatedCostNgn: number;
   };
+  /** The rates the cost was calculated with, so the figure can be checked. */
+  pricing?: IWhatsappAiPricing;
   avgDurationMs: number;
   /** `day` is 'YYYY-MM-DD'; days with no messages are absent. */
   perDay: Array<{ day: string; messages: number }>;
@@ -148,6 +157,13 @@ export interface IWhatsappUsage {
   }>;
   /** Inbound messages waiting on the bot right now (not period-bound). */
   queue: { pending: number; processing: number; failed: number };
+}
+
+export interface IWhatsappAiPricing {
+  /** Naira per dollar (the API's AI_USD_TO_NGN setting). */
+  usdToNgn: number;
+  inputUsdPerMTok: number;
+  outputUsdPerMTok: number;
 }
 
 export interface IGetWhatsappUsageFilter {
