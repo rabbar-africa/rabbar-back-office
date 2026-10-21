@@ -10,6 +10,8 @@ import {
 } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
 import type { WhatsappActivitySortField } from '@/shared/interface/whatsapp';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 import { useGetWhatsappActivity } from '../api';
 import {
   WHATSAPP_ACTION_FILTER_OPTIONS,
@@ -148,13 +150,31 @@ export function WhatsappActivityFeed({
 
   return (
     <Box>
+      {/* One wrapping row: search first, then every filter. */}
       <Flex
         alignItems={{ base: 'stretch', md: 'center' }}
-        mb=".75rem"
-        gap="3"
+        mb="1rem"
+        gap="2.5"
         direction={{ base: 'column', md: 'row' }}
         wrap="wrap"
       >
+        <SearchInput
+          placeholder="Search messages or WhatsApp name"
+          value={searchInput}
+          onChange={setSearchInput}
+          onSearch={(val) => setFilters({ search: val, page: 1 })}
+          debounceMs={500}
+          loading={isFetching}
+          width={{ base: '100%', md: '17rem' }}
+        />
+        <SearchInput
+          placeholder="Phone number"
+          value={phoneInput}
+          onChange={setPhoneInput}
+          onSearch={(val) => setFilters({ phone: val, page: 1 })}
+          debounceMs={500}
+          width={{ base: '100%', md: '10rem' }}
+        />
         {!organizationId && (
           <OrganizationFilter
             organizationId={filters.org}
@@ -175,7 +195,7 @@ export function WhatsappActivityFeed({
           onChange={(opt: { value?: string[] }) =>
             setFilters({ outcome: opt?.value?.[0] || 'all', page: 1 })
           }
-          {...selectProps('150px')}
+          {...selectProps('140px')}
         />
         <CustomSelect
           placeholder="Any action"
@@ -184,7 +204,7 @@ export function WhatsappActivityFeed({
           onChange={(opt: { value?: string[] }) =>
             setFilters({ action: opt?.value?.[0] || 'all', page: 1 })
           }
-          {...selectProps('190px')}
+          {...selectProps('170px')}
         />
         <CustomSelect
           placeholder="Any flow"
@@ -193,7 +213,7 @@ export function WhatsappActivityFeed({
           onChange={(opt: { value?: string[] }) =>
             setFilters({ flow: opt?.value?.[0] || 'all', page: 1 })
           }
-          {...selectProps('180px')}
+          {...selectProps('160px')}
         />
         <DateField
           label="From"
@@ -206,32 +226,6 @@ export function WhatsappActivityFeed({
           value={filters.to}
           min={filters.from || undefined}
           onChange={(value) => setFilters({ to: value, page: 1 })}
-        />
-      </Flex>
-
-      <Flex
-        alignItems={{ base: 'stretch', md: 'center' }}
-        mb="1.25rem"
-        gap="3"
-        direction={{ base: 'column', md: 'row' }}
-        wrap="wrap"
-      >
-        <SearchInput
-          placeholder="Search what they typed or their WhatsApp name"
-          value={searchInput}
-          onChange={setSearchInput}
-          onSearch={(val) => setFilters({ search: val, page: 1 })}
-          debounceMs={500}
-          loading={isFetching}
-          width={{ base: '100%', md: '21rem' }}
-        />
-        <SearchInput
-          placeholder="Phone number"
-          value={phoneInput}
-          onChange={setPhoneInput}
-          onSearch={(val) => setFilters({ phone: val, page: 1 })}
-          debounceMs={500}
-          width={{ base: '100%', md: '12rem' }}
         />
         <Box flexShrink={0}>
           <CustomSwitch
@@ -268,14 +262,22 @@ export function WhatsappActivityFeed({
             : ' '}
           {' · sort by clicking When, Reply time, or AI calls'}
         </Text>
-        <CustomSelect
-          options={PAGE_SIZE_OPTIONS}
-          value={[String(filters.limit)]}
-          onChange={(opt: { value?: string[] }) =>
-            setFilters({ limit: Number(opt?.value?.[0]) || 25, page: 1 })
-          }
-          {...selectProps('140px')}
-        />
+        <Flex align="center" gap="2">
+          <CustomSelect
+            options={PAGE_SIZE_OPTIONS}
+            value={[String(filters.limit)]}
+            onChange={(opt: { value?: string[] }) =>
+              setFilters({ limit: Number(opt?.value?.[0]) || 25, page: 1 })
+            }
+            rootProps={{ size: 'sm' }}
+            controlProps={{ w: '140px' }}
+          />
+          <RefreshButton
+            queryKeys={[[customQueryKey.whatsapp.activity]]}
+            label="Reload activity"
+            alignSelf="center"
+          />
+        </Flex>
       </Flex>
 
       <Box overflowX="auto" minW={0}>

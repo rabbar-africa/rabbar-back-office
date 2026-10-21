@@ -15,7 +15,7 @@ import {
 } from '../components/WhatsappOverview';
 
 const PAGE_SCHEMA = {
-  tab: { defaultValue: 'overview' },
+  tab: { defaultValue: 'activity' },
   // The open conversation lives in the URL so a chat can be linked to.
   chat: { defaultValue: '' },
 };

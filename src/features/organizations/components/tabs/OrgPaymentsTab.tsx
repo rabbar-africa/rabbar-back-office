@@ -6,6 +6,8 @@ import { SearchInput } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
 import { paymentListColumns } from '@/features/payments/components/payment-columns';
 import { useGetOrganizationPayments } from '../../api/query';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -35,15 +37,26 @@ export function OrgPaymentsTab() {
 
   return (
     <Flex direction="column" gap="1rem">
-      <SearchInput
-        placeholder="Search by payment # or customer"
-        value={searchInput}
-        onChange={setSearchInput}
-        onSearch={(val) => setFilters({ search: val, page: 1 })}
-        debounceMs={500}
-        loading={isPending}
-        width={{ base: '100%', md: '22rem' }}
-      />
+      <Flex
+        justify="space-between"
+        align={{ base: 'stretch', md: 'center' }}
+        direction={{ base: 'column', md: 'row' }}
+        gap="3"
+      >
+        <SearchInput
+          placeholder="Search by payment # or customer"
+          value={searchInput}
+          onChange={setSearchInput}
+          onSearch={(val) => setFilters({ search: val, page: 1 })}
+          debounceMs={500}
+          loading={isPending}
+          width={{ base: '100%', md: '22rem' }}
+        />
+        <RefreshButton
+          queryKeys={[[customQueryKey.organizations.getPayments, id]]}
+          label="Reload payments"
+        />
+      </Flex>
 
       <CustomTable
         data={payments}

@@ -21,6 +21,8 @@ import {
 } from '../../api/query';
 import { AddSubscriptionPaymentModal } from '../AddSubscriptionPaymentModal';
 import { ChangePlanModal } from '../ChangePlanModal';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const CANCELLED_STATES = ['cancelled', 'canceled', 'expired', 'inactive'];
 
@@ -192,6 +194,10 @@ export function OrgSubscriptionTab() {
           </Flex>
 
           <Flex gap=".75rem" wrap="wrap">
+            <RefreshButton
+              queryKeys={[[customQueryKey.subscriptions.getByOrg, id]]}
+              label="Reload subscription"
+            />
             <Button
               bg="primary.500"
               color="white"

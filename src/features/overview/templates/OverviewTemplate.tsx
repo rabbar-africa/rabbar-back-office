@@ -5,6 +5,8 @@ import { useOverview } from '../components/useOverview';
 import { OverviewFilters } from '../components/OverviewFilters';
 import { OverviewSkeleton } from '../components/OverviewSkeleton';
 import { OverviewContent } from '../components/OverviewContent';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const DAY = 'DD MMM YYYY';
 
@@ -53,6 +55,12 @@ export function OverviewTemplate() {
         subtitle={`Platform overview · ${caption}${
           isFetching && !isLoading ? ' · refreshing…' : ''
         }`}
+        action={
+          <RefreshButton
+            queryKeys={[[customQueryKey.analytics.overview]]}
+            label="Reload dashboard"
+          />
+        }
       />
 
       <OverviewFilters

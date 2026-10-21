@@ -6,6 +6,8 @@ import { SearchInput } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
 import { useInvoiceListColumns } from '@/features/invoices/components/invoice-list/columns';
 import { useGetOrganizationInvoices } from '../../api/query';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -56,7 +58,10 @@ export function OrgInvoicesTab() {
           width={{ base: '100%', md: '22rem' }}
         />
 
-        {/*  */}
+        <RefreshButton
+          queryKeys={[[customQueryKey.organizations.getInvoices, id]]}
+          label="Reload invoices"
+        />
       </Flex>
 
       <CustomTable

@@ -9,6 +9,8 @@ import { useGetPlans } from '@/features/organizations/api/query';
 import { useGetSubscriptions } from '../api';
 import { SUBSCRIPTION_STATUS_FILTER_OPTIONS, planNamesById } from '../data';
 import { buildSubscriptionColumns } from './subscription-columns';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -119,6 +121,11 @@ export function SubscriptionsTab() {
           debounceMs={500}
           loading={isFetching}
           width={{ base: '100%', md: '21rem' }}
+        />
+        <RefreshButton
+          queryKeys={[[customQueryKey.subscriptions.getAll]]}
+          label="Reload subscriptions"
+          ml={{ md: 'auto' }}
         />
       </Flex>
 

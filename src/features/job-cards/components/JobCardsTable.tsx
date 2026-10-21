@@ -16,6 +16,8 @@ import {
   type IJobCardListItem,
 } from '@/shared/interface/job-card';
 import { useGetJobCardsQuery } from '../api';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const STATUS_OPTIONS = [
   { label: 'All', value: '' },
@@ -269,6 +271,11 @@ export function JobCardsTable({
           }
           rootProps={{ size: 'sm', w: { base: '100%', md: 'auto' } }}
           controlProps={{ w: { base: '100%', md: '10rem' } }}
+        />
+        <RefreshButton
+          queryKeys={[[customQueryKey.jobCards.getAll]]}
+          label="Reload job cards"
+          ml={{ md: 'auto' }}
         />
       </Flex>
 
