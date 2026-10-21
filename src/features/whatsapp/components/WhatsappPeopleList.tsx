@@ -6,6 +6,7 @@ import {
   type SortingState,
 } from '@tanstack/react-table';
 import { CustomTable } from '@/components/table';
+import { TruncatedText } from '@/components/common/TruncatedText';
 import { SearchInput } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
 import type { IWhatsappPerson } from '@/shared/interface/whatsapp';
@@ -74,9 +75,11 @@ const buildColumns = (
           accessorFn: (row: IWhatsappPerson) =>
             row.organization?.name?.toLowerCase() ?? '',
           cell: ({ row }) => (
-            <Text fontSize="12px" color="gray.400" whiteSpace="nowrap">
-              {row.original.organization?.name ?? '—'}
-            </Text>
+            <Box w="14rem" whiteSpace="normal" wordBreak="break-word">
+              <TruncatedText lines={2} fontSize="13px" color="gray.500">
+                {row.original.organization?.name || '—'}
+              </TruncatedText>
+            </Box>
           ),
         },
       ] as ColumnDef<IWhatsappPerson, any>[])
@@ -132,15 +135,11 @@ const buildColumns = (
     header: 'Last thing they did',
     enableSorting: false,
     cell: ({ getValue }) => (
-      <Text
-        fontSize="12px"
-        color="gray.400"
-        maxW="22rem"
-        whiteSpace="normal"
-        lineClamp={2}
-      >
-        {(getValue() as string) || '—'}
-      </Text>
+      <Box w="22rem" whiteSpace="normal" wordBreak="break-word">
+        <TruncatedText lines={2} fontSize="12px" color="gray.400">
+          {(getValue() as string) || '—'}
+        </TruncatedText>
+      </Box>
     ),
   },
 ];

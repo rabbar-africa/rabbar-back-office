@@ -41,7 +41,7 @@ export const whoSubtitle = (
   phone: string
 ) => {
   const named = Boolean(who?.name || who?.whatsappName);
-  const parts = [named ? phone : null, who?.email].filter(Boolean);
+  const parts = [named ? phone : null].filter(Boolean);
   return parts.join(' · ');
 };
 

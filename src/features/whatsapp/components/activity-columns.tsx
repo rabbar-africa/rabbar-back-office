@@ -1,6 +1,7 @@
 import { Box, Text } from '@chakra-ui/react';
 import { type ColumnDef } from '@tanstack/react-table';
 import Status from '@/components/common/Status';
+import { TruncatedText } from '@/components/common/TruncatedText';
 import type { IWhatsappEvent } from '@/shared/interface/whatsapp';
 import {
   formatDuration,
@@ -12,6 +13,16 @@ import {
   whoName,
   whoSubtitle,
 } from '../data';
+
+/**
+ * Text cells that would otherwise stretch the table: a fixed width, wrapping
+ * onto at most two lines, with the full text in a tooltip when it's cut off.
+ */
+const CLAMPED_CELL = {
+  maxW: '100%',
+  whiteSpace: 'normal',
+  wordBreak: 'break-word',
+} as const;
 
 interface ActivityColumnOptions {
   /** Show which organization each event belongs to (platform-wide views). */
@@ -70,8 +81,9 @@ export function buildActivityColumns({
         const sent = whatTheySent(event);
         const didSomething = event.actions.length > 0;
         return (
-          <Box maxW="30rem" whiteSpace="normal">
-            <Text
+          <Box {...CLAMPED_CELL} w="22rem">
+            <TruncatedText
+              lines={2}
               fontSize="13px"
               color={
                 event.outcome === 'failed'
@@ -81,14 +93,18 @@ export function buildActivityColumns({
                     : 'gray.500'
               }
               fontWeight={didSomething ? '500' : '400'}
-              lineClamp={2}
             >
               {event.summary}
-            </Text>
+            </TruncatedText>
             {sent && (
-              <Text fontSize="11px" color="gray.300" lineClamp={1} mt="2px">
-                “{sent}”
-              </Text>
+              <TruncatedText
+                lines={1}
+                fontSize="11px"
+                color="gray.300"
+                mt="2px"
+              >
+                {`“${sent}”`}
+              </TruncatedText>
             )}
           </Box>
         );
@@ -162,9 +178,11 @@ export function buildActivityColumns({
       header: 'Organization',
       enableSorting: false,
       cell: ({ row }) => (
-        <Text fontSize="12px" color="gray.400" whiteSpace="nowrap">
-          {row.original.organization?.name ?? '—'}
-        </Text>
+        <Box {...CLAMPED_CELL} w="14rem">
+          <TruncatedText lines={2} fontSize="13px" color="gray.500">
+            {row.original.organization?.name || '—'}
+          </TruncatedText>
+        </Box>
       ),
     });
   }

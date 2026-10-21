@@ -1,5 +1,5 @@
 'use client';
-import { Text, Tooltip, type TextProps } from '@chakra-ui/react';
+import { Portal, Text, Tooltip, type TextProps } from '@chakra-ui/react';
 import { useRef, useState, useEffect } from 'react';
 
 interface TruncatedTextProps extends TextProps {
@@ -55,13 +55,22 @@ export function TruncatedText({
   }
 
   return (
-    <Tooltip.Root>
+    <Tooltip.Root openDelay={250}>
       <Tooltip.Trigger asChild>{truncatedText}</Tooltip.Trigger>
-      <Tooltip.Positioner>
-        <Tooltip.Content p={'.75rem'} maxW="20rem">
-          {children}
-        </Tooltip.Content>
-      </Tooltip.Positioner>
+      {/* Portalled so a scrolling table or card can't clip it. */}
+      <Portal>
+        <Tooltip.Positioner>
+          <Tooltip.Content
+            p={'.75rem'}
+            maxW="20rem"
+            fontSize="12px"
+            whiteSpace="normal"
+            wordBreak="break-word"
+          >
+            {children}
+          </Tooltip.Content>
+        </Tooltip.Positioner>
+      </Portal>
     </Tooltip.Root>
   );
 }
