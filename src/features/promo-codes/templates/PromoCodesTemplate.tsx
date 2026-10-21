@@ -12,6 +12,8 @@ import { buildPromoCodeColumns } from '../components/promo-code-columns';
 import { PromoCodeFormModal } from '../components/PromoCodeFormModal';
 import { usePromoActiveToggle } from '../components/usePromoActiveToggle';
 import { usePaidPlans } from '../components/usePaidPlans';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -121,6 +123,11 @@ export function PromoCodesTemplate() {
               debounceMs={500}
               loading={isFetching}
               width={{ base: '100%', md: '21rem' }}
+            />
+            <RefreshButton
+              queryKeys={[[customQueryKey.promoCodes.getAll]]}
+              label="Reload promo codes"
+              ml={{ md: 'auto' }}
             />
           </Flex>
 

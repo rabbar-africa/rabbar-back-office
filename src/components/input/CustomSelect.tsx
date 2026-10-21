@@ -29,8 +29,17 @@ export function CustomSelect({
   labelProps,
   rootProps,
   multiple = false,
+  width,
   ...props
 }: CustomSelectProps) {
+  // Chakra's Field.Root is full width, which makes a filter select take a
+  // whole line in a wrapping toolbar. Size the field to the control unless a
+  // width is given; with neither it stays full width, as in forms.
+  const fieldWidth =
+    width ??
+    (controlProps as { w?: unknown; width?: unknown } | undefined)?.w ??
+    (controlProps as { w?: unknown; width?: unknown } | undefined)?.width;
+
   const collection = createListCollection({
     items: options || [],
   });
@@ -53,6 +62,10 @@ export function CustomSelect({
       required={required}
       invalid={!!error}
       disabled={disabled}
+      {...(fieldWidth !== undefined && {
+        width: fieldWidth as never,
+        flexShrink: 0,
+      })}
     >
       {label && (
         <Field.Label

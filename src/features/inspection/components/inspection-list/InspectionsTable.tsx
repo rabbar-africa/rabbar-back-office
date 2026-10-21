@@ -9,6 +9,8 @@ import { useUrlState } from '@/hooks/useUrlState';
 import { RouteConstants } from '@/shared/constants/routes';
 import { useGetInspectionsQuery } from '../../api';
 import { INSPECTION_STATUS_OPTIONS, useInspectionColumns } from './columns';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -102,6 +104,11 @@ export function InspectionsTable({
             containerProps={{ flex: { base: '1', md: 'unset' } }}
           />
         </Flex>
+        <RefreshButton
+          queryKeys={[[customQueryKey.inspections.getAll]]}
+          label="Reload inspections"
+          ml={{ md: 'auto' }}
+        />
       </Flex>
 
       <CustomTable

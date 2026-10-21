@@ -22,6 +22,8 @@ import {
 } from '../data';
 import { OrganizationFilter } from './OrganizationFilter';
 import { PeriodFilter } from './PeriodFilter';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const FILTER_SCHEMA = {
   peoplePeriod: { defaultValue: DEFAULT_WHATSAPP_PERIOD },
@@ -242,6 +244,11 @@ export function WhatsappPeopleList({
           onSearch={setSearch}
           debounceMs={200}
           width={{ base: '100%', md: '21rem' }}
+        />
+        <RefreshButton
+          queryKeys={[[customQueryKey.whatsapp.people]]}
+          label="Reload people"
+          ml={{ md: 'auto' }}
         />
       </Flex>
       {people?.period && (

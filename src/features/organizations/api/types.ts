@@ -28,9 +28,16 @@ export type UpdateOrganizationPayload = Partial<CreateOrganizationPayload> & {
   isActive?: boolean;
 };
 
-export interface IGetOrganizationsFilter extends IBaseFilter {
+/** Mirrors ORGANIZATION_SORT_FIELDS on the API. */
+export type OrganizationSortField = 'name' | 'createdAt' | 'lastActivity';
+
+export interface IGetOrganizationsFilter extends Omit<IBaseFilter, 'sortBy'> {
   industry?: string;
   isActive?: boolean;
+  /** Default lastActivity: most recently active first. */
+  sortBy?: OrganizationSortField;
+  /** Default asc for name, desc for the dates. */
+  sortOrder?: 'asc' | 'desc';
 }
 
 /**

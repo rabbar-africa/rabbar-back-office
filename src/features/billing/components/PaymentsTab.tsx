@@ -9,6 +9,8 @@ import { useGetPlans } from '@/features/organizations/api/query';
 import { useGetSubscriptionPayments } from '../api';
 import { dayEndIso, dayStartIso } from '../data';
 import { paymentColumns } from './payment-columns';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -135,6 +137,11 @@ export function PaymentsTab() {
             Clear filters
           </Button>
         )}
+        <RefreshButton
+          queryKeys={[[customQueryKey.subscriptions.payments]]}
+          label="Reload payments"
+          ml={{ md: 'auto' }}
+        />
       </Flex>
 
       <Box overflowX="auto" minW={0}>

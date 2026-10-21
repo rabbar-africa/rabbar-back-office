@@ -7,6 +7,8 @@ import { useGetPlans } from '@/features/organizations/api/query';
 import { formatAmount } from '@/utils/format-number';
 import { isFreePlan } from '../data';
 import { PlanFormModal } from './PlanFormModal';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 /** The plan catalog: three fixed tiers whose names and prices can change. */
 export function PlansTab() {
@@ -18,18 +20,24 @@ export function PlansTab() {
 
   return (
     <>
-      <Box mb="1rem">
-        <Text
-          textStyle={{ base: 'default-bold', md: 'large-bold' }}
-          color="gray.500"
-        >
-          Plans
-        </Text>
-        <Text textStyle="small-regular" color="gray.300">
-          What organizations pay each month. Promo codes are applied on top of
-          these prices.
-        </Text>
-      </Box>
+      <Flex justify="space-between" align="flex-start" gap="3" mb="1rem">
+        <Box>
+          <Text
+            textStyle={{ base: 'default-bold', md: 'large-bold' }}
+            color="gray.500"
+          >
+            Plans
+          </Text>
+          <Text textStyle="small-regular" color="gray.300">
+            What organizations pay each month. Promo codes are applied on top of
+            these prices.
+          </Text>
+        </Box>
+        <RefreshButton
+          queryKeys={[[customQueryKey.plans.getAll]]}
+          label="Reload plans"
+        />
+      </Flex>
 
       <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} gap="1.25rem">
         {plans.map((plan) => (

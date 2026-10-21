@@ -40,7 +40,12 @@ export function OrganizationFilter({
   }, [data, organizationId, organizationName]);
 
   return (
-    <Flex align="center" gap="1" w={{ base: '100%', md: '15rem' }}>
+    <Flex
+      align="center"
+      gap="1"
+      w={{ base: '100%', md: '13rem' }}
+      flexShrink={0}
+    >
       <Box flex="1" minW={0}>
         <SearchCombobox
           placeholder="All organizations"

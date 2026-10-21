@@ -6,6 +6,8 @@ import { SearchInput } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
 import { useGetCustomers } from '@/features/customers/api/query';
 import { customerListColumns } from '@/features/customers/components/customer-columns';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const FILTER_SCHEMA = {
   page: { defaultValue: 1 },
@@ -36,15 +38,26 @@ export function OrgCustomersTab() {
 
   return (
     <Flex direction="column" gap="1rem">
-      <SearchInput
-        placeholder="Search customers"
-        value={searchInput}
-        onChange={setSearchInput}
-        onSearch={(val) => setFilters({ search: val, page: 1 })}
-        debounceMs={500}
-        loading={isPending}
-        width={{ base: '100%', md: '22rem' }}
-      />
+      <Flex
+        justify="space-between"
+        align={{ base: 'stretch', md: 'center' }}
+        direction={{ base: 'column', md: 'row' }}
+        gap="3"
+      >
+        <SearchInput
+          placeholder="Search customers"
+          value={searchInput}
+          onChange={setSearchInput}
+          onSearch={(val) => setFilters({ search: val, page: 1 })}
+          debounceMs={500}
+          loading={isPending}
+          width={{ base: '100%', md: '22rem' }}
+        />
+        <RefreshButton
+          queryKeys={[[customQueryKey.customers.getAll]]}
+          label="Reload customers"
+        />
+      </Flex>
 
       <CustomTable
         data={customers}

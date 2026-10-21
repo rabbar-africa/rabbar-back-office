@@ -22,6 +22,8 @@ import {
 } from '../data';
 import { MessagesPerDayChart } from './MessagesPerDayChart';
 import { PeriodFilter } from './PeriodFilter';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 const FILTER_SCHEMA = {
   ovPeriod: { defaultValue: DEFAULT_WHATSAPP_PERIOD },
@@ -118,6 +120,11 @@ export function WhatsappOverview({ onDrillDown }: WhatsappOverviewProps) {
             {formatWhen(usage.period.from)} – {formatWhen(usage.period.to)}
           </Text>
         )}
+        <RefreshButton
+          queryKeys={[[customQueryKey.whatsapp.usage]]}
+          label="Reload numbers"
+          ml={{ md: 'auto' }}
+        />
       </Flex>
 
       {isError ? (

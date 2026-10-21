@@ -1,4 +1,5 @@
 export * from './AddFolder';
+export * from './ArrowClockwise';
 export * from './ArrowDown';
 export * from './ArrowLeft';
 export * from './ArrowLeftRightIcon';

@@ -25,6 +25,8 @@ import {
 } from '../api';
 import { PermissionMatrix, toMatrixRows } from './PermissionMatrix';
 import { RoleFormModal } from './RoleFormModal';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
 
 interface OrgRolesPanelProps {
   orgId: string;
@@ -130,6 +132,13 @@ export function OrgRolesPanel({ orgId }: OrgRolesPanelProps) {
             </SimpleGrid>
 
             <Flex gap="2" wrap="wrap">
+              <RefreshButton
+                queryKeys={[
+                  [customQueryKey.access.orgRoles, orgId],
+                  [customQueryKey.access.orgPermissions, orgId],
+                ]}
+                label="Reload roles"
+              />
               <Button
                 size="sm"
                 variant="outlineSecondary"
