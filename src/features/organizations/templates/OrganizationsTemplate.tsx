@@ -1,5 +1,13 @@
 import { useMemo, useState } from 'react';
-import { Box, Button, Flex, Heading, Text } from '@chakra-ui/react';
+import {
+  Badge,
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Icon,
+  Text,
+} from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import type { ColumnDef, SortingState, Updater } from '@tanstack/react-table';
 import moment from 'moment';
@@ -8,11 +16,54 @@ import Status from '@/components/common/Status';
 import { SearchInput } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
 import { RouteConstants } from '@/shared/constants/routes';
-import type { IOrganization } from '@/shared/interface/common';
+import type { IOrganization, SignupSource } from '@/shared/interface/common';
+import { ChatCircle } from '@/assets/custom/ChatCircle';
+import { GlobeIcon } from '@/assets/custom/GlobeIcon';
 import { useGetOrganizations } from '../api/query';
 import type { OrganizationSortField } from '../api/types';
 import { RefreshButton } from '@/components/common/RefreshButton';
 import { customQueryKey } from '@/shared/constants/query-keys';
+
+const SIGNUP_SOURCES: Record<
+  SignupSource,
+  { label: string; icon: typeof ChatCircle; bg: string; color: string }
+> = {
+  WHATSAPP: {
+    label: 'Signed up on WhatsApp',
+    icon: ChatCircle,
+    bg: 'success.50',
+    color: 'success.300',
+  },
+  WEB: {
+    label: 'Signed up on the web',
+    icon: GlobeIcon,
+    bg: 'gray.50',
+    color: 'gray.400',
+  },
+};
+
+/** Small tag under the name; nothing for rows from before the field existed. */
+function SignupSourceTag({ source }: { source?: SignupSource | null }) {
+  const meta = source ? SIGNUP_SOURCES[source] : undefined;
+  if (!meta) return null;
+  return (
+    <Badge
+      bg={meta.bg}
+      color={meta.color}
+      rounded="full"
+      px=".5rem"
+      py="1px"
+      gap=".25rem"
+      fontSize="10px"
+      fontWeight="500"
+      textTransform="none"
+      whiteSpace="nowrap"
+    >
+      <Icon as={meta.icon} boxSize=".625rem" />
+      {meta.label}
+    </Badge>
+  );
+}
 
 const formatDate = (value?: string | null) =>
   value ? moment(value).format('DD MMM YYYY') : null;
@@ -23,7 +74,17 @@ const formatDate = (value?: string | null) =>
  * only shows the arrows.
  */
 const columns: ColumnDef<IOrganization, any>[] = [
-  { id: 'name', accessorKey: 'name', header: 'Organization' },
+  {
+    id: 'name',
+    accessorKey: 'name',
+    header: 'Organization',
+    cell: ({ row }) => (
+      <Flex direction="column" align="flex-start" gap=".25rem">
+        <Text>{row.original.name}</Text>
+        <SignupSourceTag source={row.original.signupSource} />
+      </Flex>
+    ),
+  },
   { accessorKey: 'companyEmail', header: 'Email', enableSorting: false },
   { accessorKey: 'phone', header: 'Phone', enableSorting: false },
   {

@@ -71,9 +71,14 @@ export interface IOrganizationConfig {
   createdAt: string;
   updatedAt: string;
 }
+/** Where an organization signed up. Set once, at registration. */
+export type SignupSource = 'WEB' | 'WHATSAPP';
+
 export interface IOrganization {
   id: string;
   name: string;
+  /** The web app's signup form, or the WhatsApp bot. */
+  signupSource?: SignupSource | null;
   slug: string;
   email: string;
   companyEmail: string;
