@@ -5,6 +5,7 @@ import {
   type QueryConfigType,
 } from '@/lib/react-query';
 import {
+  getBackOfficePayments,
   getPayments,
   getPaymentById,
   createPayment,
@@ -49,6 +50,18 @@ export const useGetPaymentsQuery = (
   useQuery({
     queryKey: KEYS.list(filter),
     queryFn: () => getPayments(filter),
+    ...config,
+  });
+
+/** Payments across all organizations (back-office list page). */
+export const useGetBackOfficePaymentsQuery = (
+  filter?: IGetPaymentsReceivedFilter,
+  config?: QueryConfigType<typeof getBackOfficePayments>
+) =>
+  useQuery({
+    // Under the same root as the tenant list, so payment changes refresh it.
+    queryKey: [...KEYS.all, 'back-office', filter],
+    queryFn: () => getBackOfficePayments(filter),
     ...config,
   });
 

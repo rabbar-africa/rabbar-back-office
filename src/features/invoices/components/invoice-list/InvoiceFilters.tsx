@@ -10,10 +10,11 @@ interface InvoiceFiltersProps {
   onSearchCommit: (value: string) => void;
   status: string;
   onStatusChange: (value: string) => void;
-  dueDateFrom: string;
-  dueDateTo: string;
-  onDueDateFromChange: (value: string) => void;
-  onDueDateToChange: (value: string) => void;
+  /** Omit the four date props to hide the date range. */
+  dueDateFrom?: string;
+  dueDateTo?: string;
+  onDueDateFromChange?: (value: string) => void;
+  onDueDateToChange?: (value: string) => void;
   isLoading?: boolean;
 }
 
@@ -49,27 +50,29 @@ export function InvoiceFilters({
         controlProps={{ w: { base: '100%', md: '140px' } }}
       />
 
-      <Flex
-        flexWrap={{ base: 'wrap', lg: 'unset' }}
-        gap="2"
-        align="center"
-        w={{ base: '100%', md: 'auto' }}
-      >
-        <DateField
-          label="From"
-          value={dueDateFrom}
-          max={dueDateTo || undefined}
-          onChange={onDueDateFromChange}
-          containerProps={{ flex: { base: '1', lg: 'unset' } }}
-        />
-        <DateField
-          label="To"
-          value={dueDateTo}
-          min={dueDateFrom || undefined}
-          onChange={onDueDateToChange}
-          containerProps={{ flex: { base: '1', lg: 'unset' } }}
-        />
-      </Flex>
+      {onDueDateFromChange && onDueDateToChange && (
+        <Flex
+          flexWrap={{ base: 'wrap', lg: 'unset' }}
+          gap="2"
+          align="center"
+          w={{ base: '100%', md: 'auto' }}
+        >
+          <DateField
+            label="From"
+            value={dueDateFrom ?? ''}
+            max={dueDateTo || undefined}
+            onChange={onDueDateFromChange}
+            containerProps={{ flex: { base: '1', lg: 'unset' } }}
+          />
+          <DateField
+            label="To"
+            value={dueDateTo ?? ''}
+            min={dueDateFrom || undefined}
+            onChange={onDueDateToChange}
+            containerProps={{ flex: { base: '1', lg: 'unset' } }}
+          />
+        </Flex>
+      )}
 
       <SearchInput
         placeholder="Search by invoice # or customer"

@@ -1,3 +1,4 @@
+import type { IRecordOrganization } from './common';
 import type { IBaseFilter } from './filter';
 
 export type PaymentMethod =
@@ -28,6 +29,8 @@ export interface Payment {
 export interface IPaymentReceived {
   id: string;
   organizationId: string;
+  /** Present on back-office list rows (GET back-office/…). */
+  organization?: IRecordOrganization;
   paymentNumber: string;
   referenceNumber: string;
   customerId: string;

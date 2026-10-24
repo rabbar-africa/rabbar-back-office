@@ -22,6 +22,19 @@ export const getAllInvoices = async (filter?: IGetInvoiceFilter) => {
   return response.data;
 };
 
+/**
+ * Every organization's invoices, for the back office. The tenant `/invoices`
+ * route takes the organization from the login token, and a platform admin's
+ * token has none, so it rejects the call. Filters: page, limit, search,
+ * status, organizationId (no date range).
+ */
+export const getBackOfficeInvoices = async (filter?: IGetInvoiceFilter) => {
+  const apiUrl = buildUrlWithQueryParams('back-office/invoices', filter);
+  const response =
+    await axios.get<ApiResponse<Array<IInvoiceResponse>>>(apiUrl);
+  return response.data;
+};
+
 export const getInvoiceById = async (id: string) => {
   const baseUrl = `/invoices/${id}`;
   const response = await axios.get<ApiResponse<IInvoiceResponse>>(baseUrl);

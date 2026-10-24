@@ -57,6 +57,7 @@ export function ActionMenu<T>({ row, actions }: ActionMenuProps<T>) {
                     <Menu.Separator borderColor={'gray.50'} />
                   )}
                   <Menu.Item
+                    disabled={isDisabled}
                     onClick={(e) => !isDisabled && handleActionClick(action, e)}
                     color={
                       action.variant === 'destructive' ? 'red.500' : undefined
@@ -65,7 +66,7 @@ export function ActionMenu<T>({ row, actions }: ActionMenuProps<T>) {
                       bg:
                         action.variant === 'destructive' ? 'red.50' : 'gray.50',
                     }}
-                    value={action.value}
+                    value={action.value ?? String(index)}
                   >
                     {action.label}
                   </Menu.Item>

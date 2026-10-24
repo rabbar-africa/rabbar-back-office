@@ -1,3 +1,4 @@
+import type { IRecordOrganization } from './common';
 import type { ICustomer } from './customer';
 import type { IBaseFilter } from './filter';
 import type { PaymentModeDto } from './payment';
@@ -47,6 +48,8 @@ export interface InvoiceCarry {
 export interface IInvoiceResponse {
   id: string;
   organizationId: string;
+  /** Present on back-office list rows (GET back-office/…). */
+  organization?: IRecordOrganization;
   invoiceNumber: string;
   referenceNumber: string;
   customerId: string;

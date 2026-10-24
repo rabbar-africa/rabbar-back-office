@@ -28,9 +28,14 @@ export function useInvoiceDetail() {
     useRecalculateInvoiceMutation();
   const invoice = invoiceData?.data;
 
-  // Payments linked to this invoice (via their allocations).
+  // Payments linked to this invoice (via their allocations). A platform
+  // admin has no organization of their own, so name the invoice's.
+  const organizationId = invoice?.organizationId;
   const { data: paymentsData, isLoading: isLoadingPayments } =
-    useGetPaymentsQuery(id ? { invoiceId: id } : undefined);
+    useGetPaymentsQuery(
+      id && organizationId ? { invoiceId: id, organizationId } : undefined,
+      { enabled: Boolean(id && organizationId) }
+    );
   const payments = paymentsData?.data ?? [];
 
   // const {

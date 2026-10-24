@@ -7,6 +7,7 @@ import {
   cancelWriteOffInvoice,
   recalculateInvoice,
   getAllInvoices,
+  getBackOfficeInvoices,
   deleteInvoice,
   getOutstandingInvoices,
   addCarriedInvoice,
@@ -21,6 +22,18 @@ import type {
   CollectInvoicePaymentPayload,
 } from '@/shared/interface/invoice';
 import { customQueryKey } from '@/shared/constants/query-keys';
+
+/** Invoices across all organizations (back-office list page). */
+export const useGetBackOfficeInvoicesQuery = (
+  filter?: IGetInvoiceFilter,
+  config?: QueryConfigType<typeof getBackOfficeInvoices>
+) =>
+  useQuery({
+    // Same root key as the tenant list, so deletes and edits refresh it too.
+    queryKey: [customQueryKey.invoices.getAll, 'back-office', filter],
+    queryFn: () => getBackOfficeInvoices(filter),
+    ...config,
+  });
 
 export const useGetAllInvoicesQuery = (
   filter?: IGetInvoiceFilter,

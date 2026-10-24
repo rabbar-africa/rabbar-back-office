@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Box, Button, Flex, Stack, Text } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { CustomTable } from '@/components/table';
@@ -11,6 +12,10 @@ import {
 } from '@/features/invoices/components/invoice-list/columns';
 import { InvoiceFilters } from '@/features/invoices/components/invoice-list/InvoiceFilters';
 import { DeleteInvoiceConfirm } from '@/features/invoices/components/invoice-list/DeleteInvoiceConfirm';
+import { organizationColumn } from '@/features/organizations/components/organization-column';
+import { RefreshButton } from '@/components/common/RefreshButton';
+import { customQueryKey } from '@/shared/constants/query-keys';
+import type { IInvoiceResponse } from '@/shared/interface/invoice';
 
 export function InvoiceListTemplate() {
   const navigate = useNavigate();
@@ -40,7 +45,16 @@ export function InvoiceListTemplate() {
     isDeleting,
   } = useInvoiceList();
 
-  const columns = useInvoiceListColumns();
+  const baseColumns = useInvoiceListColumns();
+  // Cross-organization list: say whose invoice each row is, after Invoice #.
+  const columns = useMemo(
+    () => [
+      baseColumns[0],
+      organizationColumn<IInvoiceResponse>('invoices'),
+      ...baseColumns.slice(1),
+    ],
+    [baseColumns]
+  );
 
   const selectionCount = selectedInvoices.length;
   const downloadFilename =
@@ -55,7 +69,7 @@ export function InvoiceListTemplate() {
       <Stack gap="6">
         <PageHeader
           title="Invoices"
-          subtitle="Manage and track all your invoices"
+          subtitle="Every organization's invoices"
           action={
             <Flex gap="2" wrap="wrap">
               <DownloadButton
@@ -97,6 +111,10 @@ export function InvoiceListTemplate() {
                   : 'Click a row to view invoice details'}
               </Text>
             </Box>
+            <RefreshButton
+              queryKeys={[[customQueryKey.invoices.getAll]]}
+              label="Reload invoices"
+            />
           </Flex>
 
           <InvoiceFilters
@@ -105,12 +123,6 @@ export function InvoiceListTemplate() {
             onSearchCommit={handleSearchCommit}
             status={filters.status}
             onStatusChange={(val) => setFilters({ status: val, page: 1 })}
-            dueDateFrom={filters.dueDateFrom}
-            dueDateTo={filters.dueDateTo}
-            onDueDateFromChange={(val) =>
-              setFilters({ dueDateFrom: val, page: 1 })
-            }
-            onDueDateToChange={(val) => setFilters({ dueDateTo: val, page: 1 })}
             isLoading={isFetching}
           />
 

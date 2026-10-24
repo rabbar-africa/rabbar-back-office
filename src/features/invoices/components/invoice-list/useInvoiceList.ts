@@ -8,7 +8,7 @@ import type { IInvoiceResponse } from '@/shared/interface/invoice';
 import { getInvoiceById } from '../../api/service';
 import {
   useDeleteInvoiceMutation,
-  useGetAllInvoicesQuery,
+  useGetBackOfficeInvoicesQuery,
 } from '../../api/query';
 import { useInvoicePdf } from '../../hooks/useInvoicePdf';
 import { toCsvRow } from './columns';
@@ -18,8 +18,6 @@ const FILTER_SCHEMA = {
   limit: { defaultValue: 20 },
   search: { defaultValue: '' },
   status: { defaultValue: '' },
-  dueDateFrom: { defaultValue: '' },
-  dueDateTo: { defaultValue: '' },
 };
 
 export function useInvoiceList() {
@@ -52,13 +50,13 @@ export function useInvoiceList() {
     [downloadPdf]
   );
 
-  const { data, isLoading, isFetching } = useGetAllInvoicesQuery({
+  // Every organization's invoices. The back-office endpoint has no date-range
+  // filter, so the list offers search and status only.
+  const { data, isLoading, isFetching } = useGetBackOfficeInvoicesQuery({
     page: filters.page,
     limit: filters.limit,
     ...(filters.search ? { search: filters.search } : {}),
     ...(filters.status ? { status: filters.status } : {}),
-    ...(filters.dueDateFrom ? { dateFrom: filters.dueDateFrom } : {}),
-    ...(filters.dueDateTo ? { dateTo: filters.dueDateTo } : {}),
   });
 
   const invoices = useMemo(() => data?.data ?? [], [data?.data]);
@@ -88,6 +86,18 @@ export function useInvoiceList() {
         value: 'edit',
         onClick: (invoice) =>
           navigate(RouteConstants.invoices.detail.generate({ id: invoice.id })),
+      },
+      {
+        label: 'Open organization',
+        value: 'organization',
+        onClick: (invoice) =>
+          navigate(
+            RouteConstants.organizations.detail.generate(
+              { id: invoice.organization?.id ?? '' },
+              { tab: 'invoices' }
+            )
+          ),
+        disabled: (invoice) => !invoice.organization?.id,
       },
       {
         label: 'Download PDF',

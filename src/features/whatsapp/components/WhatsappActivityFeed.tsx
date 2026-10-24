@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 import type { SortingState, Updater } from '@tanstack/react-table';
-import { CustomTable } from '@/components/table';
+import { CustomTable, type TableAction } from '@/components/table';
 import {
   CustomSelect,
   CustomSwitch,
@@ -9,7 +10,11 @@ import {
   SearchInput,
 } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
-import type { WhatsappActivitySortField } from '@/shared/interface/whatsapp';
+import { RouteConstants } from '@/shared/constants/routes';
+import type {
+  IWhatsappEvent,
+  WhatsappActivitySortField,
+} from '@/shared/interface/whatsapp';
 import { RefreshButton } from '@/components/common/RefreshButton';
 import { customQueryKey } from '@/shared/constants/query-keys';
 import { useGetWhatsappActivity } from '../api';
@@ -102,6 +107,33 @@ export function WhatsappActivityFeed({
   const columns = useMemo(
     () => buildActivityColumns({ showOrganization: !organizationId }),
     [organizationId]
+  );
+
+  const navigate = useNavigate();
+  // Platform-wide only: inside an organization's own tab it would go nowhere.
+  const actions = useMemo<TableAction<IWhatsappEvent>[]>(
+    () =>
+      organizationId
+        ? []
+        : [
+            {
+              label: 'Open organization',
+              onClick: (event) =>
+                event.organization &&
+                navigate(
+                  RouteConstants.organizations.detail.generate({
+                    id: event.organization.id,
+                  })
+                ),
+              // Unlinked numbers don't belong to an organization.
+              disabled: (event) => !event.organization,
+            },
+            {
+              label: 'View conversation',
+              onClick: (event) => onOpenConversation(event.phone),
+            },
+          ],
+    [organizationId, navigate, onOpenConversation]
   );
 
   // The API sorts across every page; the table only shows the arrows.
@@ -296,6 +328,8 @@ export function WhatsappActivityFeed({
               ? 'No WhatsApp activity matches these filters'
               : 'No WhatsApp activity yet'
           }
+          actions={actions}
+          enableActions={actions.length > 0}
           onRowClick={(row) => onOpenConversation(row.original.phone)}
           pagination={{
             pageIndex: filters.page - 1,
