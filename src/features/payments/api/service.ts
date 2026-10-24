@@ -15,6 +15,23 @@ export const getPayments = async (filter?: IGetPaymentsReceivedFilter) => {
   return response.data;
 };
 
+/**
+ * Every organization's payments received, for the back office. The tenant
+ * `/payments-received` route needs an organization a platform admin doesn't
+ * have. Filters: page, limit, search, status, organizationId.
+ */
+export const getBackOfficePayments = async (
+  filter?: IGetPaymentsReceivedFilter
+) => {
+  const apiUrl = buildUrlWithQueryParams(
+    'back-office/payments-received',
+    filter || {}
+  );
+  const response =
+    await axios.get<ApiResponse<Array<IPaymentReceived>>>(apiUrl);
+  return response.data;
+};
+
 export const getPaymentById = async (id: string) => {
   const response = await axios.get<ApiResponse<IPaymentReceived>>(
     `/payments-received/${id}`

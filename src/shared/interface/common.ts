@@ -71,6 +71,13 @@ export interface IOrganizationConfig {
   createdAt: string;
   updatedAt: string;
 }
+/** The owning organization, as the back office's cross-org lists return it. */
+export interface IRecordOrganization {
+  id: string;
+  name: string;
+  slug?: string | null;
+}
+
 /** Where an organization signed up. Set once, at registration. */
 export type SignupSource = 'WEB' | 'WHATSAPP';
 

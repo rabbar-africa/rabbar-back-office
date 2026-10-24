@@ -156,6 +156,7 @@ export function useInvoiceListColumns(): ColumnDef<IInvoiceResponse, any>[] {
 
 export const INVOICE_CSV_HEADERS = {
   invoiceNumber: 'Invoice #',
+  organization: 'Organization',
   customerName: 'Customer',
   issueDate: 'Issue Date',
   dueDate: 'Due Date',
@@ -168,6 +169,7 @@ export const INVOICE_CSV_HEADERS = {
 export function toCsvRow(inv: IInvoiceResponse) {
   return {
     invoiceNumber: inv.invoiceNumber,
+    organization: inv.organization?.name ?? '',
     customerName: inv.customerName ?? inv.client?.displayName ?? '',
     issueDate: inv.date,
     dueDate: inv.dueDate,
