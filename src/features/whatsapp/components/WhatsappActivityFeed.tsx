@@ -26,7 +26,7 @@ import {
   dayStartIso,
 } from '../data';
 import { buildActivityColumns } from './activity-columns';
-import { OrganizationFilter } from './OrganizationFilter';
+import { OrganizationFilter } from '@/features/organizations/components/OrganizationFilter';
 
 /**
  * URL keys (all prefixed `wa_`). The overview's drill-downs write these same

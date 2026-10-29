@@ -1,3 +1,4 @@
+import type { IInvoiceExpense } from './expense';
 import type { IRecordOrganization } from './common';
 import type { ICustomer } from './customer';
 import type { IBaseFilter } from './filter';
@@ -73,6 +74,10 @@ export interface IInvoiceResponse {
   taxId?: string | null;
   taxName?: string | null;
   taxPercent?: string | number | null;
+  /** Expenses recorded against this invoice, newest first. */
+  expenses?: IInvoiceExpense[];
+  /** Sum of `expenses`. */
+  expensesTotal?: number;
   status: string;
   date: string;
   dueDate: string;

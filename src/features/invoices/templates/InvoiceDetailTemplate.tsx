@@ -7,6 +7,7 @@ import { InvoiceDetailHeader } from '@/features/invoices/components/invoice-deta
 import { InvoiceDetailSkeleton } from '@/features/invoices/components/invoice-detail/InvoiceDetailSkeleton';
 import { InvoicePdfView } from '@/features/invoices/components/invoice-detail/InvoicePdfView';
 import { ConnectedPayments } from '@/features/invoices/components/invoice-detail/ConnectedPayments';
+import { InvoiceExpenses } from '@/features/invoices/components/invoice-detail/InvoiceExpenses';
 import { WriteOffInvoiceConfirm } from '@/features/invoices/components/invoice-detail/WriteOffInvoiceConfirm';
 
 export function InvoiceDetailTemplate() {
@@ -82,6 +83,8 @@ export function InvoiceDetailTemplate() {
           currencyCode={invoice.currencyCode}
           onViewPayment={viewPayment}
         />
+
+        <InvoiceExpenses invoice={invoice} />
 
         <InvoicePdfView invoice={invoice} />
       </Stack>

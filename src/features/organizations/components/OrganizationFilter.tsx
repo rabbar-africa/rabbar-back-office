@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Box, CloseButton, Flex } from '@chakra-ui/react';
 import { SearchCombobox } from '@/components/input';
-import { useGetOrganizations } from '@/features/organizations/api/query';
+import { useGetOrganizations } from '../api/query';
 
 interface OrganizationFilterProps {
   organizationId: string;
