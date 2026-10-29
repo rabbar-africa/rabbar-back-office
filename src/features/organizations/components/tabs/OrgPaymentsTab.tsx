@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Flex } from '@chakra-ui/react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { RouteConstants } from '@/shared/constants/routes';
 import { CustomTable } from '@/components/table';
 import { SearchInput } from '@/components/input';
 import { useUrlState } from '@/hooks/useUrlState';
@@ -17,6 +18,7 @@ const FILTER_SCHEMA = {
 
 export function OrgPaymentsTab() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [filters, setFilters] = useUrlState(FILTER_SCHEMA, {
     replace: true,
     prefix: 'payment_',
@@ -72,6 +74,11 @@ export function OrgPaymentsTab() {
         totalItems={meta?.total}
         hasNextPage={filters.page < (meta?.totalPages ?? 1)}
         hasPrevPage={filters.page > 1}
+        onRowClick={(row) =>
+          navigate(
+            RouteConstants.payments.detail.generate({ id: row.original.id })
+          )
+        }
       />
     </Flex>
   );

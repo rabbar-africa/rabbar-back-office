@@ -6,6 +6,7 @@ import type { IInvoiceResponse } from '@/shared/interface/invoice';
 import { formatAddress } from '@/utils/string-formatter';
 import { Link } from 'react-router-dom';
 import { RouteConstants } from '@/shared/constants/routes';
+import { invoiceTaxLabel, invoiceVehicleRows } from './invoice-display';
 
 const toNum = (v: string | null | undefined) => Number(v ?? 0) || 0;
 const formatDate = (v: string) => moment(v).format('DD MMM YYYY');
@@ -56,6 +57,9 @@ export function InvoicePdfView({ invoice }: InvoicePdfViewProps) {
   const orgConfig = organization?.config;
   const bankAccount = organization?.primaryBankAccount;
   const orgAddress = formatAddress(organization?.primaryAddress);
+
+  const taxLabel = invoiceTaxLabel(invoice);
+  const vehicleRows = invoiceVehicleRows(invoice);
 
   const notes = invoice.notes || orgConfig?.invoiceNotesDefault;
   const terms = invoice.terms || orgConfig?.invoiceTermsDefault;
@@ -271,8 +275,40 @@ export function InvoicePdfView({ invoice }: InvoicePdfViewProps) {
         ))}
       </Box>
 
-      {/* Totals — right-aligned, no outer box */}
-      <Flex justify="flex-end" mb="10">
+      {/* Totals — right-aligned, no outer box; vehicle details to the left */}
+      <Flex
+        direction={{ base: 'column', md: 'row' }}
+        justify={vehicleRows.length > 0 ? 'space-between' : 'flex-end'}
+        align={{ base: 'stretch', md: 'flex-start' }}
+        gap="8"
+        mb="10"
+      >
+        {vehicleRows.length > 0 && (
+          <Box>
+            <Text fontSize="13px" fontWeight="600" color="primary.400" mb="2">
+              Vehicle Information
+            </Text>
+            <Grid templateColumns="max-content 1fr" columnGap="6" rowGap="1.5">
+              {vehicleRows.flatMap((row) => [
+                <Text
+                  key={`${row.label}-label`}
+                  fontSize="12px"
+                  color="gray.400"
+                >
+                  {row.label}
+                </Text>,
+                <Text
+                  key={`${row.label}-value`}
+                  fontSize="12px"
+                  fontWeight="500"
+                  color="gray.500"
+                >
+                  {row.value}
+                </Text>,
+              ])}
+            </Grid>
+          </Box>
+        )}
         <Stack gap="0" w={{ base: '100%', md: '360px' }}>
           <TotalRow label="Sub Total" value={formatPlain(subtotal)} />
           {discountAmount > 0 && (
@@ -282,7 +318,7 @@ export function InvoicePdfView({ invoice }: InvoicePdfViewProps) {
             />
           )}
           {taxAmount > 0 && (
-            <TotalRow label="VAT" value={formatPlain(taxAmount)} />
+            <TotalRow label={taxLabel} value={formatPlain(taxAmount)} />
           )}
           {adjustment !== 0 && (
             <TotalRow

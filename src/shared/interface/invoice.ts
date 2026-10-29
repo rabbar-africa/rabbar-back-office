@@ -45,6 +45,18 @@ export interface InvoiceCarry {
   carriedInvoice: CarriedInvoice;
 }
 
+/** Mirrors VEHICLE_SELECT on the API's invoice detail. */
+export interface IInvoiceVehicle {
+  id: string;
+  clientId?: string | null;
+  make?: string | null;
+  model?: string | null;
+  year?: number | string | null;
+  registrationNumber?: string | null;
+  vin?: string | null;
+  color?: string | null;
+}
+
 export interface IInvoiceResponse {
   id: string;
   organizationId: string;
@@ -54,6 +66,13 @@ export interface IInvoiceResponse {
   referenceNumber: string;
   customerId: string;
   customerName: string;
+  vehicleId?: string | null;
+  /** The vehicle the job was for; null when the invoice has none. */
+  vehicle?: IInvoiceVehicle | null;
+  /** Whole-job tax: the orgTaxes id, with a snapshot of its name and rate. */
+  taxId?: string | null;
+  taxName?: string | null;
+  taxPercent?: string | number | null;
   status: string;
   date: string;
   dueDate: string;

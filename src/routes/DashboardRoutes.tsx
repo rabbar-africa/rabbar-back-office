@@ -2,6 +2,7 @@ import { lazyImport } from '@/utils/lazyImports';
 import { Outlet } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 import { RouteError } from '@/components/error/RoutError';
+import { NotFound } from '@/components/error/NotFound';
 import { AppLayout } from '@/components/layouts';
 import { InspectionRoutes } from '@/features/inspection/routes';
 import { InvoiceRoutes } from '@/features/invoices/routes';
@@ -53,5 +54,7 @@ export const DashboardRoutes: RouteObject = {
     ...ExpenseRoutes,
     ...ReportRoutes,
     ...SettingsRoutes,
+    // Anything else under the dashboard: a 404 inside the app layout.
+    { path: '*', element: <NotFound /> },
   ],
 };
