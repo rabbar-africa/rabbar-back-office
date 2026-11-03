@@ -22,6 +22,8 @@ import { ShieldIcon } from '@/assets/custom/ShieldIcon';
 import { GearIcon } from '@/assets/custom/GearIcon';
 import { ThreeDotsIcon } from '@/assets/custom/ThreeDotsIcon';
 import { CaretRight } from '@/assets/custom/CaretRight';
+import { BooksIcon } from '@/assets/custom/BooksIcon';
+import { NotebookIcon } from '@/assets/custom/NotebookIcon';
 
 interface OrgTab {
   value: string;
@@ -39,6 +41,8 @@ export const ORG_DETAIL_TABS: OrgTab[] = [
   { value: 'customers', label: 'Customers', icon: UsersIcon },
   { value: 'whatsapp', label: 'WhatsApp', icon: ChatCircle },
   { value: 'settings', label: 'Settings', icon: GearIcon },
+  { value: 'banking', label: 'Banking', icon: BooksIcon },
+  { value: 'expenses', label: 'Expenses', icon: NotebookIcon },
   { value: 'inspections', label: 'Inspections', icon: TaskIcon },
   { value: 'job-cards', label: 'Job Cards', icon: ClipboardTextIcon },
   { value: 'subscription', label: 'Subscription', icon: CalendarDotsIcon },

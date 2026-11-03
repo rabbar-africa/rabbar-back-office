@@ -57,6 +57,10 @@ const organizations = {
   create: defineRoute('/organizations/create' as const),
   detail: defineRoute('/organizations/:id' as const),
   edit: defineRoute('/organizations/:id/edit' as const),
+  /** One account's statement, from the organization's Banking tab. */
+  statement: defineRoute(
+    '/organizations/:id/accounts/:accountId/statement' as const
+  ),
 } as const;
 
 const billing = {

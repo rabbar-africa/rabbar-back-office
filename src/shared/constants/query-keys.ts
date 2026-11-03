@@ -92,6 +92,14 @@ export const customQueryKey = {
     getAll: 'get-all-promo-codes',
     getById: 'get-promo-code-by-id',
   },
+  expenses: {
+    getAll: 'get-all-expenses',
+  },
+  banking: {
+    accounts: 'get-organization-accounts',
+    statement: 'get-account-statement',
+    business: 'get-business-statement',
+  },
   whatsapp: {
     usage: 'get-whatsapp-usage',
     activity: 'get-whatsapp-activity',

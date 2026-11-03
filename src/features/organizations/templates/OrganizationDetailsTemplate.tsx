@@ -27,6 +27,8 @@ import { OrgRolesTab } from '../components/tabs/OrgRolesTab';
 import { OrgInspectionsTab } from '../components/tabs/OrgInspectionsTab';
 import { OrgJobCardsTab } from '../components/tabs/OrgJobCardsTab';
 import { OrgWhatsappTab } from '../components/tabs/OrgWhatsappTab';
+import { OrgBankingTab } from '../components/tabs/OrgBankingTab';
+import { OrgExpensesTab } from '../components/tabs/OrgExpensesTab';
 import { DeleteOrganizationModal } from '../components/DeleteOrganizationModal';
 import {
   ORG_DETAIL_TABS,
@@ -151,6 +153,12 @@ export function OrganizationDetailsTemplate() {
           </Tabs.Content>
           <Tabs.Content value="subscription">
             {activeTab === 'subscription' && <OrgSubscriptionTab />}
+          </Tabs.Content>
+          <Tabs.Content value="banking">
+            {activeTab === 'banking' && <OrgBankingTab />}
+          </Tabs.Content>
+          <Tabs.Content value="expenses">
+            {activeTab === 'expenses' && <OrgExpensesTab />}
           </Tabs.Content>
           <Tabs.Content value="whatsapp">
             {activeTab === 'whatsapp' && <OrgWhatsappTab />}

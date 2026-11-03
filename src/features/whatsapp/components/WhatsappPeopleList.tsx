@@ -20,7 +20,7 @@ import {
   whoName,
   whoSubtitle,
 } from '../data';
-import { OrganizationFilter } from './OrganizationFilter';
+import { OrganizationFilter } from '@/features/organizations/components/OrganizationFilter';
 import { PeriodFilter } from './PeriodFilter';
 import { RefreshButton } from '@/components/common/RefreshButton';
 import { customQueryKey } from '@/shared/constants/query-keys';

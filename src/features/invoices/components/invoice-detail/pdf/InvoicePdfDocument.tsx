@@ -13,6 +13,7 @@ import type { IInvoiceResponse } from '@/shared/interface/invoice';
 import { formatAddress } from '@/utils/string-formatter';
 import { pdfColors as c } from './colors';
 import { registerPdfFonts } from './registerFonts';
+import { invoiceTaxLabel, invoiceVehicleRows } from '../invoice-display';
 
 registerPdfFonts();
 
@@ -130,6 +131,12 @@ const styles = StyleSheet.create({
   cellAccent: { fontSize: 9, fontWeight: 500, color: c.primary400 },
   cellMuted: { fontSize: 9, color: c.gray500 },
 
+  // Vehicle details, beside the totals
+  vehicleInfo: { width: 240 },
+  vehicleInfoRow: { flexDirection: 'row', marginBottom: 3 },
+  vehicleInfoLabel: { fontSize: 8, color: c.gray400, width: 55 },
+  vehicleInfoValue: { fontSize: 8, fontWeight: 500, color: c.gray500, flex: 1 },
+
   // Totals
   totalsWrap: {
     flexDirection: 'row',
@@ -230,6 +237,9 @@ export function InvoicePdfDocument({
   const orgLocation = [organization?.city, organization?.country]
     .filter(Boolean)
     .join(' , ');
+
+  const taxLabel = invoiceTaxLabel(invoice);
+  const vehicleRows = invoiceVehicleRows(invoice);
 
   const notes = invoice.notes || orgConfig?.invoiceNotesDefault;
   const terms = invoice.terms || orgConfig?.invoiceTermsDefault;
@@ -350,8 +360,25 @@ export function InvoicePdfDocument({
           ))}
         </View>
 
-        {/* Totals */}
-        <View style={styles.totalsWrap}>
+        {/* Totals, with vehicle details to the left */}
+        <View
+          style={
+            vehicleRows.length > 0
+              ? [styles.totalsWrap, { justifyContent: 'space-between' }]
+              : styles.totalsWrap
+          }
+        >
+          {vehicleRows.length > 0 ? (
+            <View style={styles.vehicleInfo}>
+              <Text style={styles.sectionTitle}>Vehicle Information</Text>
+              {vehicleRows.map((row) => (
+                <View key={row.label} style={styles.vehicleInfoRow}>
+                  <Text style={styles.vehicleInfoLabel}>{row.label}</Text>
+                  <Text style={styles.vehicleInfoValue}>{row.value}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
           <View style={styles.totals}>
             <TotalRow label="Sub Total" value={plain(subtotal)} />
             {discountAmount > 0 ? (
@@ -361,7 +388,7 @@ export function InvoicePdfDocument({
               />
             ) : null}
             {taxAmount > 0 ? (
-              <TotalRow label="VAT" value={plain(taxAmount)} />
+              <TotalRow label={taxLabel} value={plain(taxAmount)} />
             ) : null}
             {adjustment !== 0 ? (
               <TotalRow

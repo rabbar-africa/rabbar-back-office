@@ -57,8 +57,16 @@ export function PaymentsTemplate() {
       )
     );
 
+  const openReceipt = (payment: IPaymentReceived) =>
+    navigate(RouteConstants.payments.detail.generate({ id: payment.id }));
+
   const actions = useMemo<TableAction<IPaymentReceived>[]>(
     () => [
+      {
+        label: 'View receipt',
+        value: 'receipt',
+        onClick: openReceipt,
+      },
       {
         label: 'Open organization',
         value: 'organization',
@@ -110,7 +118,7 @@ export function PaymentsTemplate() {
             All Payments
           </Text>
           <Text textStyle="small-regular" color="gray.300">
-            Click a row to see it in its organization
+            Click a row to view the receipt
           </Text>
         </Box>
 
@@ -159,7 +167,7 @@ export function PaymentsTemplate() {
             }
             enableActions
             actions={actions}
-            onRowClick={(row) => openOrganizationPayments(row.original)}
+            onRowClick={(row) => openReceipt(row.original)}
             pagination={{
               pageIndex: filters.page - 1,
               pageSize: filters.limit,
