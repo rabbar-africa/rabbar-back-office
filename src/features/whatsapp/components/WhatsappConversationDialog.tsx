@@ -1,16 +1,18 @@
-import { Fragment, useLayoutEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Button,
   CloseButton,
   Dialog,
   Flex,
+  IconButton,
   Portal,
   Spinner,
   Text,
 } from '@chakra-ui/react';
 import moment from 'moment';
 import Status from '@/components/common/Status';
+import { ArrowDownIcon } from '@/assets/custom/ArrowDown';
 import type { IWhatsappEvent } from '@/shared/interface/whatsapp';
 import { useGetWhatsappConversation } from '../api';
 import {
@@ -50,6 +52,18 @@ export function WhatsappConversationDialog({
   );
   const latest = data?.pages[0]?.data;
 
+  // Consecutive messages grouped by calendar day, oldest first.
+  const days = useMemo(() => {
+    const groups: Array<{ key: string; messages: IWhatsappEvent[] }> = [];
+    for (const message of messages) {
+      const key = moment(message.at).format('YYYY-MM-DD');
+      const last = groups[groups.length - 1];
+      if (last?.key === key) last.messages.push(message);
+      else groups.push({ key, messages: [message] });
+    }
+    return groups;
+  }, [messages]);
+
   // Open at the newest message; keep the reader's place when older ones load.
   const scrollRef = useRef<HTMLDivElement>(null);
   const previousHeight = useRef(0);
@@ -69,6 +83,21 @@ export function WhatsappConversationDialog({
     fetchNextPage();
   };
 
+  // Offer a way back down once the reader has scrolled up into history.
+  const [awayFromBottom, setAwayFromBottom] = useState(false);
+  useEffect(() => setAwayFromBottom(false), [phone]);
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    // Same value → React skips the re-render, so this is cheap per frame.
+    setAwayFromBottom(el.scrollHeight - el.scrollTop - el.clientHeight > 160);
+  };
+  const jumpToBottom = () =>
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: 'smooth',
+    });
+
   return (
     <Dialog.Root
       placement="center"
@@ -80,7 +109,12 @@ export function WhatsappConversationDialog({
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content maxW="40rem" p="0" overflow="hidden">
+          <Dialog.Content
+            maxW="40rem"
+            p="0"
+            overflow="hidden"
+            position="relative"
+          >
             <Dialog.Header
               px="1.5rem"
               py="1.125rem"
@@ -113,8 +147,10 @@ export function WhatsappConversationDialog({
             {/* Dialog.Body is the direct flex child, so inside-scroll works. */}
             <Dialog.Body
               ref={scrollRef}
+              onScroll={handleScroll}
               px="1.5rem"
-              py="1.25rem"
+              pt="0"
+              pb="1.25rem"
               bg="gray.50"
               minH="16rem"
             >
@@ -131,7 +167,7 @@ export function WhatsappConversationDialog({
                   No messages from this number.
                 </Text>
               ) : (
-                <Flex direction="column" gap="1rem">
+                <Flex direction="column" gap="1rem" pt="1rem">
                   {hasNextPage && (
                     <Button
                       size="xs"
@@ -143,21 +179,42 @@ export function WhatsappConversationDialog({
                       Load earlier messages
                     </Button>
                   )}
-                  {messages.map((message, index) => {
-                    const previous = messages[index - 1];
-                    const newDay =
-                      !previous ||
-                      !moment(previous.at).isSame(message.at, 'day');
-                    return (
-                      <Fragment key={message.id}>
-                        {newDay && <DaySeparator iso={message.at} />}
-                        <Exchange event={message} />
-                      </Fragment>
-                    );
-                  })}
+                  {/* One container per day, so each pinned day label
+                      scrolls away with its own messages. */}
+                  {days.map((day) => (
+                    <Flex key={day.key} direction="column" gap="1rem">
+                      <DaySeparator iso={day.messages[0].at} />
+                      {day.messages.map((message) => (
+                        <Exchange key={message.id} event={message} />
+                      ))}
+                    </Flex>
+                  ))}
                 </Flex>
               )}
             </Dialog.Body>
+
+            {/* Outside the scrolling body, so it stays put while the chat moves. */}
+            {awayFromBottom && messages.length > 0 && (
+              <IconButton
+                aria-label="Jump to latest message"
+                title="Jump to latest message"
+                position="absolute"
+                bottom="1rem"
+                right="1.25rem"
+                zIndex={2}
+                size="sm"
+                rounded="full"
+                bg="white"
+                color="primary.300"
+                borderWidth="1px"
+                borderColor="gray.75"
+                shadow="md"
+                _hover={{ bg: 'primary.50' }}
+                onClick={jumpToBottom}
+              >
+                <ArrowDownIcon boxSize=".875rem" />
+              </IconButton>
+            )}
           </Dialog.Content>
         </Dialog.Positioner>
       </Portal>
@@ -165,9 +222,18 @@ export function WhatsappConversationDialog({
   );
 }
 
+/**
+ * The day label. Sticky: as you scroll, each day's label pins to the top of
+ * the chat until the next day's label pushes it off, so the date of what
+ * you're reading is always in view.
+ */
 function DaySeparator({ iso }: { iso: string }) {
   return (
     <Text
+      position="sticky"
+      top=".5rem"
+      zIndex={1}
+      shadow="xs"
       alignSelf="center"
       textStyle="tiny-regular"
       color="gray.300"
