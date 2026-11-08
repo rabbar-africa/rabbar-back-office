@@ -5,7 +5,13 @@ import type { IBaseFilter } from './filter';
  * Mirrors `GET/POST/PATCH /back-office/promo-codes` (PromoCodesService).
  */
 
-export type PlanTier = 'STARTER' | 'STANDARD' | 'PREMIUM';
+/** Lowest first. `WHATSAPP` is shown as Chat Lite. */
+export type PlanTier =
+  | 'STARTER'
+  | 'WHATSAPP'
+  | 'STANDARD'
+  | 'PREMIUM'
+  | 'ENTERPRISE';
 
 export type PromoDiscountType = 'FREE_MONTHS' | 'PERCENT' | 'FIXED';
 

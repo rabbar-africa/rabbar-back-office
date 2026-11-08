@@ -1,3 +1,7 @@
+import type {
+  IPlanFeatureRow,
+  IPlanLimitRow,
+} from '@/shared/interface/plan-entitlements';
 import type { IBaseFilter } from '@/shared/interface/filter';
 import type { CreateOrgBankAccountPayload } from '@/shared/interface/settings';
 
@@ -100,6 +104,15 @@ export interface IPlan {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Sold by talking to us (Enterprise): never at checkout, and its 0 price is
+   * not a price. From GET /back-office/plans only.
+   */
+  contactSales?: boolean;
+  contactUrl?: string | null;
+  /** What the plan includes, from GET /back-office/plans only. */
+  features?: IPlanFeatureRow[];
+  limits?: IPlanLimitRow[];
 }
 
 export interface ISubscriptionPayment {

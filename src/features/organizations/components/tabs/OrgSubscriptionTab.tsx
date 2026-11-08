@@ -18,9 +18,12 @@ import {
   useCancelSubscription,
   useReactivateSubscription,
   useGetPlans,
+  useGetOrganizationEntitlements,
 } from '../../api/query';
 import { AddSubscriptionPaymentModal } from '../AddSubscriptionPaymentModal';
 import { ChangePlanModal } from '../ChangePlanModal';
+import { OrgPlanTermsCard } from '../OrgPlanTermsCard';
+import { planPriceLabel } from '@/features/billing/data';
 import { RefreshButton } from '@/components/common/RefreshButton';
 import { customQueryKey } from '@/shared/constants/query-keys';
 
@@ -81,13 +84,21 @@ export function OrgSubscriptionTab() {
 
   const { data, isPending } = useGetOrganizationSubscription(id!);
   const subscription = data?.data;
-  // Only needed to name a pending (scheduled) plan; cached across the app.
-  const { data: plansData } = useGetPlans({
-    enabled: Boolean(subscription?.pendingPlanId),
-  });
+  // Names plans (a pending one, the terms' plan); cached across the app.
+  const { data: plansData } = useGetPlans({ enabled: Boolean(subscription) });
   const pendingPlan = plansData?.data?.find(
     (plan) => plan.id === subscription?.pendingPlanId
   );
+  const planName = (tier?: string | null) =>
+    plansData?.data?.find((plan) => plan.tier === tier)?.name ??
+    tier ??
+    'its plan';
+  const { data: termsData, isPending: termsLoading } =
+    useGetOrganizationEntitlements(id!, { enabled: Boolean(subscription) });
+  const terms = termsData?.data?.terms;
+  // A plan change drops terms agreed for the plan on file.
+  const termsFor =
+    terms?.agreedFor && !terms.stale ? planName(terms.agreedFor) : undefined;
 
   const cancelMutation = useCancelSubscription();
   const reactivateMutation = useReactivateSubscription();
@@ -116,7 +127,7 @@ export function OrgSubscriptionTab() {
         { label: 'Plan', value: plan?.name || plan?.tier || '—' },
         {
           label: 'Amount',
-          value: formatAmount(Number(plan?.monthlyPrice ?? 0), plan?.currency),
+          value: plan ? planPriceLabel(plan) : '—',
         },
         {
           label: 'Current Period',
@@ -266,6 +277,15 @@ export function OrgSubscriptionTab() {
       </Box>
 
       {subscription && (
+        <OrgPlanTermsCard
+          orgId={id!}
+          data={termsData?.data}
+          isPending={termsLoading}
+          planName={planName}
+        />
+      )}
+
+      {subscription && (
         <Box>
           <Text fontSize="1rem" fontWeight="600" mb=".75rem">
             Payment History
@@ -289,6 +309,7 @@ export function OrgSubscriptionTab() {
         onOpenChange={({ open }) => setPlanOpen(open)}
         orgId={id!}
         currentTier={plan?.tier}
+        termsFor={termsFor}
       />
 
       <ConsentDialog

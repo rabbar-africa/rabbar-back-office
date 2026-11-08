@@ -44,3 +44,13 @@ export const SUBSCRIPTION_RENEWAL_REMINDER_DAYS = 3;
 
 /** The free default plan every organization starts on. */
 export const FREE_PLAN_TIER = 'STARTER';
+
+/**
+ * Plans sold by talking to us (Enterprise). Their stored price is 0 only to
+ * keep the billing job away: it is not free, and it is never at checkout.
+ * Mirrors CONTACT_SALES_TIERS on the API.
+ */
+export const CONTACT_SALES_TIERS: readonly string[] = ['ENTERPRISE'];
+
+export const isContactSalesTier = (tier?: string | null) =>
+  Boolean(tier && CONTACT_SALES_TIERS.includes(tier));

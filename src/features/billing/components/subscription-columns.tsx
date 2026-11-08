@@ -3,13 +3,12 @@ import { type ColumnDef } from '@tanstack/react-table';
 import Status from '@/components/common/Status';
 import { subscriptionStatusLabel } from '@/shared/constants/subscription';
 import type { ISubscriptionListItem } from '@/shared/interface/billing';
-import { formatAmount } from '@/utils/format-number';
 import {
   RENEWAL_TONE_COLOR,
   describePeriod,
   describeRenewal,
   formatDate,
-  isFreePlan,
+  planPriceLabel,
   type PlanNamesById,
 } from '../data';
 
@@ -42,9 +41,7 @@ export function buildSubscriptionColumns(
               {plan?.name ?? '—'}
             </Text>
             <Text fontSize="11px" color="gray.300" whiteSpace="nowrap">
-              {plan && !isFreePlan(plan)
-                ? `${formatAmount(Number(plan.monthlyPrice), plan.currency)}/month`
-                : 'Free'}
+              {plan ? planPriceLabel(plan) : '—'}
             </Text>
           </Box>
         );

@@ -13,7 +13,10 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { CustomInput, CustomSwitch, CustomTextArea } from '@/components/input';
 import type { IPlan } from '@/features/organizations/api/types';
-import { FREE_PLAN_TIER } from '@/shared/constants/subscription';
+import {
+  FREE_PLAN_TIER,
+  isContactSalesTier,
+} from '@/shared/constants/subscription';
 import { useUpdatePlan } from '../api';
 
 const schema = Yup.object({
@@ -38,6 +41,10 @@ interface PlanFormModalProps {
 export function PlanFormModal({ plan, onClose }: PlanFormModalProps) {
   const updatePlan = useUpdatePlan();
   const isFreeTier = plan?.tier === FREE_PLAN_TIER;
+  // Enterprise: priced per business, so its stored 0 keeps the billing job
+  // away, and it stays off sale so it is never at checkout or an upgrade.
+  const isContactSales = isContactSalesTier(plan?.tier);
+  const fixedPrice = isFreeTier || isContactSales;
 
   const formik = useFormik({
     enableReinitialize: true,
@@ -58,10 +65,11 @@ export function PlanFormModal({ plan, onClose }: PlanFormModalProps) {
           payload: {
             name: values.name.trim(),
             description: values.description.trim(),
-            // Starter stays free: the billing job treats any priced plan as paid.
-            monthlyPrice: isFreeTier ? 0 : Number(values.monthlyPrice),
+            // Starter stays free and Enterprise stays at 0: the billing job
+            // treats any priced plan as paid.
+            monthlyPrice: fixedPrice ? 0 : Number(values.monthlyPrice),
             currency: values.currency.trim().toUpperCase(),
-            isActive: values.isActive,
+            isActive: isContactSales ? false : values.isActive,
           },
         },
         { onSuccess: onClose }
@@ -125,11 +133,13 @@ export function PlanFormModal({ plan, onClose }: PlanFormModalProps) {
                     <CustomInput
                       label="Monthly price"
                       placeholder="0.00"
-                      disabled={isFreeTier}
+                      disabled={fixedPrice}
                       helperText={
                         isFreeTier
                           ? 'Starter is the free default plan and stays at 0.'
-                          : undefined
+                          : isContactSales
+                            ? 'Priced per business. Record what they agreed as a payment on their Subscription tab.'
+                            : undefined
                       }
                       error={formik.errors.monthlyPrice}
                       inputProps={{
@@ -155,14 +165,17 @@ export function PlanFormModal({ plan, onClose }: PlanFormModalProps) {
                   <Box>
                     <CustomSwitch
                       label="Available to organizations"
-                      checked={formik.values.isActive}
+                      checked={isContactSales ? false : formik.values.isActive}
+                      disabled={isContactSales}
                       onCheckedChange={({ checked }: { checked: boolean }) =>
                         formik.setFieldValue('isActive', checked)
                       }
                       helperText={
-                        deactivating
-                          ? 'Organizations can no longer upgrade to this plan. Those already on it are not affected.'
-                          : 'Inactive plans are hidden from the upgrade options in the app.'
+                        isContactSales
+                          ? 'Never on sale: it is sold by talking to us, and the landing page shows "Talk to us".'
+                          : deactivating
+                            ? 'Organizations can no longer upgrade to this plan. Those already on it are not affected.'
+                            : 'Inactive plans are hidden from the upgrade options in the app.'
                       }
                     />
                   </Box>

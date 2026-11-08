@@ -9,8 +9,11 @@ import {
   chakra,
 } from '@chakra-ui/react';
 import { CustomSelect, CustomTextArea } from '@/components/input';
-import { FREE_PLAN_TIER } from '@/shared/constants/subscription';
-import { formatAmount } from '@/utils/format-number';
+import {
+  FREE_PLAN_TIER,
+  isContactSalesTier,
+} from '@/shared/constants/subscription';
+import { planPriceLabel } from '@/features/billing/data';
 import { useChangeSubscriptionPlan, useGetPlans } from '../api/query';
 
 interface ChangePlanModalProps {
@@ -19,6 +22,8 @@ interface ChangePlanModalProps {
   orgId: string;
   /** Tier the organization is on now, so it isn't offered as a choice. */
   currentTier?: string;
+  /** Name of the plan this business's agreed terms are for, if in force. */
+  termsFor?: string;
 }
 
 /**
@@ -31,11 +36,15 @@ export function ChangePlanModal({
   onOpenChange,
   orgId,
   currentTier,
+  termsFor,
 }: ChangePlanModalProps) {
   const { data: plansData, isPending: plansLoading } = useGetPlans({
     enabled: open,
   });
-  const plans = (plansData?.data ?? []).filter((plan) => plan.isActive);
+  // Enterprise is never on sale, but it is put on a business from here.
+  const plans = (plansData?.data ?? []).filter(
+    (plan) => plan.isActive || isContactSalesTier(plan.tier)
+  );
   const changePlan = useChangeSubscriptionPlan();
 
   const [planTier, setPlanTier] = useState('');
@@ -53,14 +62,12 @@ export function ChangePlanModal({
   const options = plans
     .filter((plan) => plan.tier !== currentTier)
     .map((plan) => ({
-      label:
-        plan.tier === FREE_PLAN_TIER || Number(plan.monthlyPrice) <= 0
-          ? `${plan.name} — Free`
-          : `${plan.name} — ${formatAmount(Number(plan.monthlyPrice), plan.currency)}/month`,
+      label: `${plan.name} — ${planPriceLabel(plan)}`,
       value: plan.tier,
     }));
 
   const toFree = planTier === FREE_PLAN_TIER;
+  const toContactSales = isContactSalesTier(planTier);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +131,24 @@ export function ChangePlanModal({
                       >
                         {toFree
                           ? 'The current paid period is cleared and the organization moves to the free plan right away.'
-                          : 'The subscription becomes active on the new plan and keeps its current period end date.'}
+                          : toContactSales
+                            ? 'The business gets everything on Enterprise right away. The app never bills it: record what was agreed as a payment, then set its own terms under Plan & terms.'
+                            : 'The subscription becomes active on the new plan and keeps its current period end date.'}
+                      </Text>
+                    </Box>
+                  )}
+
+                  {planTier && termsFor && (
+                    <Box
+                      bg="warning.50"
+                      rounded=".5rem"
+                      px=".75rem"
+                      py=".625rem"
+                    >
+                      <Text textStyle="tiny-regular" color="secondary.500">
+                        The terms agreed for {termsFor} stop applying. They are
+                        kept, and apply again only if the business goes back to{' '}
+                        {termsFor} before new terms are set.
                       </Text>
                     </Box>
                   )}
