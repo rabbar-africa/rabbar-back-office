@@ -21,6 +21,8 @@ export const SUBSCRIPTION_PAYMENT_METHOD_LABELS: Record<string, string> = {
   PAYSTACK_USSD: 'USSD (Paystack)',
   PAYSTACK_BANK: 'Bank (Paystack)',
   PROMO: 'Promo code',
+  // A plan given from the back office for a while (amount 0).
+  COMPLIMENTARY: 'Given free',
   BANK_TRANSFER: 'Bank transfer',
   CARD: 'Card',
   CASH: 'Cash',

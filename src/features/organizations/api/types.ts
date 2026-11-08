@@ -177,7 +177,19 @@ export interface ChangePlanPayload {
   planTier: string;
   /** Optional context recorded with the change. */
   note?: string;
+  /**
+   * How long the plan is given for: at most one of these. None means no end
+   * date, which the API allows only for Starter (free, never ends).
+   */
+  durationDays?: number;
+  durationMonths?: number;
+  /** YYYY-MM-DD: through the end of that day, Lagos time. */
+  endsAt?: string;
+  /** When the time runs out: back to Starter (default) or ask them to pay. */
+  whenEnds?: PlanGrantEnd;
 }
+
+export type PlanGrantEnd = 'starter' | 'renew';
 
 export interface CreateManualPaymentPayload {
   planTier: string;
