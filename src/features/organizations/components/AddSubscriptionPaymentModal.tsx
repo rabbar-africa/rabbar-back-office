@@ -10,6 +10,8 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import moment from 'moment';
 import { CustomInput, CustomSelect, CustomTextArea } from '@/components/input';
+import { planPriceLabel } from '@/features/billing/data';
+import { isContactSalesTier } from '@/shared/constants/subscription';
 import { useGetPlans, useCreateManualSubscription } from '../api/query';
 
 const PAYMENT_METHODS = [
@@ -55,7 +57,7 @@ export function AddSubscriptionPaymentModal({
   });
   const plans = plansData?.data || [];
   const planOptions = plans.map((plan) => ({
-    label: `${plan.name} — ${plan.currency} ${plan.monthlyPrice}`,
+    label: `${plan.name} — ${planPriceLabel(plan)}`,
     value: plan.id,
   }));
 
@@ -108,7 +110,11 @@ export function AddSubscriptionPaymentModal({
       ...prev,
       planId,
       planTier: plan?.tier ?? '',
-      amount: plan ? plan.monthlyPrice : prev.amount,
+      // Enterprise's stored 0 is not its price: type what was agreed.
+      amount:
+        plan && !isContactSalesTier(plan.tier)
+          ? plan.monthlyPrice
+          : prev.amount,
       currency: plan?.currency ?? prev.currency,
     }));
   };

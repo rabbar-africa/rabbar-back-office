@@ -9,6 +9,10 @@ import type {
   ISubscriptionPaymentRecord,
   UpdatePlanPayload,
 } from '@/shared/interface/billing';
+import type {
+  EntitlementChanges,
+  IPlanCatalog,
+} from '@/shared/interface/plan-entitlements';
 import { buildUrlWithQueryParams } from '@/utils/build-url-query';
 
 const SUBSCRIPTIONS_PATH = 'back-office/subscriptions';
@@ -55,6 +59,32 @@ export const billingService = {
   }) => {
     const response = await axios.patch<ApiResponse<IPlan>>(
       `${PLANS_PATH}/${id}`,
+      payload
+    );
+    return response.data;
+  },
+
+  /** Everything a plan can include, and each tier's shipped defaults. */
+  getPlanCatalog: async () => {
+    const response = await axios.get<ApiResponse<IPlanCatalog>>(
+      `${PLANS_PATH}/catalog`
+    );
+    return response.data;
+  },
+
+  /**
+   * Change what a plan includes. Every business on it gets the change within
+   * a minute. Null puts an entry back to the shipped default.
+   */
+  updatePlanEntitlements: async ({
+    id,
+    payload,
+  }: {
+    id: string;
+    payload: EntitlementChanges;
+  }) => {
+    const response = await axios.patch<ApiResponse<IPlan>>(
+      `${PLANS_PATH}/${id}/entitlements`,
       payload
     );
     return response.data;

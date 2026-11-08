@@ -72,3 +72,38 @@ export function useUpdatePlan(
     ...config,
   });
 }
+
+export function useGetPlanCatalog(
+  config?: QueryConfigType<typeof billingService.getPlanCatalog>
+) {
+  return useQuery({
+    queryKey: [customQueryKey.plans.catalog],
+    queryFn: billingService.getPlanCatalog,
+    // Changes only with a deploy.
+    staleTime: Infinity,
+    ...config,
+  });
+}
+
+/**
+ * A plan's entitlements also decide every business's terms on it, so refresh
+ * those along with the catalog.
+ */
+export function useUpdatePlanEntitlements(
+  config?: MutationConfig<typeof billingService.updatePlanEntitlements>
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: billingService.updatePlanEntitlements,
+    meta: {
+      successMessage: 'Plan updated. Businesses on it get it within a minute.',
+    },
+    onSuccess: () => {
+      [
+        customQueryKey.plans.getAll,
+        customQueryKey.subscriptions.entitlements,
+      ].forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
+    },
+    ...config,
+  });
+}

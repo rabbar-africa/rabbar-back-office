@@ -342,6 +342,8 @@ function useInvalidateSubscription() {
       customQueryKey.subscriptions.getByOrg,
       customQueryKey.subscriptions.getAll,
       customQueryKey.subscriptions.payments,
+      // A plan change can put agreed terms in or out of force.
+      customQueryKey.subscriptions.entitlements,
     ].forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
 }
 
@@ -420,6 +422,54 @@ export function useChangeSubscriptionPlan(
     mutationFn: organizationsSubscriptionService.changePlan,
     meta: { successMessage: 'Plan changed' },
     onSuccess: invalidate,
+    ...config,
+  });
+}
+
+export function useGetOrganizationEntitlements(
+  id: string,
+  config?: QueryConfigType<
+    typeof organizationsSubscriptionService.getEntitlements
+  >
+) {
+  return useQuery({
+    queryKey: [customQueryKey.subscriptions.entitlements, id],
+    queryFn: () => organizationsSubscriptionService.getEntitlements(id),
+    enabled: !!id,
+    ...config,
+  });
+}
+
+export function useUpdateOrganizationEntitlements(
+  config?: MutationConfig<
+    typeof organizationsSubscriptionService.updateEntitlements
+  >
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: organizationsSubscriptionService.updateEntitlements,
+    meta: { successMessage: 'Terms saved' },
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: [customQueryKey.subscriptions.entitlements],
+      }),
+    ...config,
+  });
+}
+
+export function useClearOrganizationEntitlements(
+  config?: MutationConfig<
+    typeof organizationsSubscriptionService.clearEntitlements
+  >
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: organizationsSubscriptionService.clearEntitlements,
+    meta: { successMessage: 'Terms removed' },
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: [customQueryKey.subscriptions.entitlements],
+      }),
     ...config,
   });
 }

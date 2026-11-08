@@ -28,6 +28,10 @@ import type {
   IOrganizationDeletionRequest,
   IOrganizationDeletionResult,
 } from './types';
+import type {
+  IOrgEntitlements,
+  UpdateOrgEntitlementsPayload,
+} from '@/shared/interface/plan-entitlements';
 
 const BASE_PATH = 'back-office/organizations';
 
@@ -309,6 +313,34 @@ export const organizationsSubscriptionService = {
     const response = await axios.patch<ApiResponse<IOrganizationSubscription>>(
       `back-office/subscriptions/${data.id}/plan`,
       data.payload
+    );
+    return response.data;
+  },
+
+  /** Terms agreed with this business, its plan, and what it can do now. */
+  getEntitlements: async (id: string) => {
+    const response = await axios.get<ApiResponse<IOrgEntitlements>>(
+      `back-office/subscriptions/${id}/entitlements`
+    );
+    return response.data;
+  },
+
+  /** Only what changes; null puts one entry back to the plan's value. */
+  updateEntitlements: async (data: {
+    id: string;
+    payload: UpdateOrgEntitlementsPayload;
+  }) => {
+    const response = await axios.patch<ApiResponse<IOrgEntitlements>>(
+      `back-office/subscriptions/${data.id}/entitlements`,
+      data.payload
+    );
+    return response.data;
+  },
+
+  /** Drop every term agreed with this business, and the note. */
+  clearEntitlements: async (id: string) => {
+    const response = await axios.delete<ApiResponse<IOrgEntitlements>>(
+      `back-office/subscriptions/${id}/entitlements`
     );
     return response.data;
   },

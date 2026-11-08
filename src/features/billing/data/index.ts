@@ -1,7 +1,9 @@
 import moment from 'moment';
 import type { IPlan } from '@/features/organizations/api/types';
+import { formatAmount } from '@/utils/format-number';
 import {
   FREE_PLAN_TIER,
+  isContactSalesTier,
   SUBSCRIPTION_GRACE_PERIOD_DAYS,
   SUBSCRIPTION_RENEWAL_REMINDER_DAYS,
   SUBSCRIPTION_STATUS_LABELS,
@@ -33,8 +35,19 @@ export const formatDate = (iso?: string | null) =>
 export const describePeriod = (start?: string | null, end?: string | null) =>
   start && end ? `${formatDate(start)} – ${formatDate(end)}` : '—';
 
+/** Free to use. Enterprise also stores 0, but only to keep the billing job away. */
 export const isFreePlan = (plan: Pick<IPlan, 'tier' | 'monthlyPrice'>) =>
-  plan.tier === FREE_PLAN_TIER || Number(plan.monthlyPrice) <= 0;
+  plan.tier === FREE_PLAN_TIER ||
+  (!isContactSalesTier(plan.tier) && Number(plan.monthlyPrice) <= 0);
+
+/** "Free", "₦5,000/month", or "Agreed per business" for Enterprise. */
+export function planPriceLabel(
+  plan: Pick<IPlan, 'tier' | 'monthlyPrice' | 'currency'>
+): string {
+  if (isContactSalesTier(plan.tier)) return 'Agreed per business';
+  if (isFreePlan(plan)) return 'Free';
+  return `${formatAmount(Number(plan.monthlyPrice), plan.currency)}/month`;
+}
 
 /** Plan id → display name, from GET /back-office/plans. */
 export type PlanNamesById = Record<string, string>;
@@ -99,6 +112,8 @@ export function describeRenewal(
     }
   }
 
+  if (isContactSalesTier(sub.plan.tier))
+    return { label: 'Agreed terms · not billed by the app', tone: 'muted' };
   if (isFreePlan(sub.plan)) return { label: 'Free plan', tone: 'muted' };
   if (!end) return { label: '—', tone: 'muted' };
 

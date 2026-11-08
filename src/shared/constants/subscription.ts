@@ -21,6 +21,8 @@ export const SUBSCRIPTION_PAYMENT_METHOD_LABELS: Record<string, string> = {
   PAYSTACK_USSD: 'USSD (Paystack)',
   PAYSTACK_BANK: 'Bank (Paystack)',
   PROMO: 'Promo code',
+  // A plan given from the back office for a while (amount 0).
+  COMPLIMENTARY: 'Given free',
   BANK_TRANSFER: 'Bank transfer',
   CARD: 'Card',
   CASH: 'Cash',
@@ -44,3 +46,13 @@ export const SUBSCRIPTION_RENEWAL_REMINDER_DAYS = 3;
 
 /** The free default plan every organization starts on. */
 export const FREE_PLAN_TIER = 'STARTER';
+
+/**
+ * Plans sold by talking to us (Enterprise). Their stored price is 0 only to
+ * keep the billing job away: it is not free, and it is never at checkout.
+ * Mirrors CONTACT_SALES_TIERS on the API.
+ */
+export const CONTACT_SALES_TIERS: readonly string[] = ['ENTERPRISE'];
+
+export const isContactSalesTier = (tier?: string | null) =>
+  Boolean(tier && CONTACT_SALES_TIERS.includes(tier));

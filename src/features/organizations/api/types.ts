@@ -1,3 +1,7 @@
+import type {
+  IPlanFeatureRow,
+  IPlanLimitRow,
+} from '@/shared/interface/plan-entitlements';
 import type { IBaseFilter } from '@/shared/interface/filter';
 import type { CreateOrgBankAccountPayload } from '@/shared/interface/settings';
 
@@ -100,6 +104,15 @@ export interface IPlan {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Sold by talking to us (Enterprise): never at checkout, and its 0 price is
+   * not a price. From GET /back-office/plans only.
+   */
+  contactSales?: boolean;
+  contactUrl?: string | null;
+  /** What the plan includes, from GET /back-office/plans only. */
+  features?: IPlanFeatureRow[];
+  limits?: IPlanLimitRow[];
 }
 
 export interface ISubscriptionPayment {
@@ -164,7 +177,19 @@ export interface ChangePlanPayload {
   planTier: string;
   /** Optional context recorded with the change. */
   note?: string;
+  /**
+   * How long the plan is given for: at most one of these. None means no end
+   * date, which the API allows only for Starter (free, never ends).
+   */
+  durationDays?: number;
+  durationMonths?: number;
+  /** YYYY-MM-DD: through the end of that day, Lagos time. */
+  endsAt?: string;
+  /** When the time runs out: back to Starter (default) or ask them to pay. */
+  whenEnds?: PlanGrantEnd;
 }
+
+export type PlanGrantEnd = 'starter' | 'renew';
 
 export interface CreateManualPaymentPayload {
   planTier: string;
