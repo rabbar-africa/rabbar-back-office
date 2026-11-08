@@ -1,5 +1,6 @@
 import type { IInvoiceExpense } from './expense';
 import type { IRecordOrganization } from './common';
+import type { IAccountRef } from '@/shared/interface/banking';
 import type { ICustomer } from './customer';
 import type { IBaseFilter } from './filter';
 import type { PaymentModeDto } from './payment';
@@ -63,6 +64,8 @@ export interface IInvoiceResponse {
   organizationId: string;
   /** Present on back-office list rows (GET back-office/…). */
   organization?: IRecordOrganization;
+  /** The account this invoice asks to be paid into. */
+  bankAccount?: IAccountRef | null;
   invoiceNumber: string;
   referenceNumber: string;
   customerId: string;

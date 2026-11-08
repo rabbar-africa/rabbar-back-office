@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from '@react-pdf/renderer';
 import moment from 'moment';
-import { formatMoney } from '@/hooks/useFormatMoney';
+import { formatPdfMoney as formatMoney } from '@/utils/format-pdf-money';
 import type { IOrganization } from '@/shared/interface/common';
 import type { IInvoiceResponse } from '@/shared/interface/invoice';
 import { formatAddress } from '@/utils/string-formatter';
@@ -18,7 +18,11 @@ import { invoiceTaxLabel, invoiceVehicleRows } from '../invoice-display';
 registerPdfFonts();
 
 const toNum = (v: string | null | undefined) => Number(v ?? 0) || 0;
-const formatDate = (v: string) => (v ? moment(v).format('DD MMM YYYY') : '—');
+// Dates are stored without a time, so read them in UTC, as the backend's copy does.
+const formatDate = (v: string) => {
+  const date = moment.utc(v);
+  return v && date.isValid() ? date.format('DD MMM YYYY') : '—';
+};
 
 const styles = StyleSheet.create({
   page: {
@@ -232,7 +236,9 @@ export function InvoicePdfDocument({
       : balance + broughtForwardTotal;
 
   const orgConfig = organization?.config;
-  const bankAccount = organization?.primaryBankAccount;
+  // The account this invoice asks to be paid into; older ones fall back to the
+  // primary, as the backend's copy does.
+  const bankAccount = invoice.bankAccount ?? organization?.primaryBankAccount;
   const orgAddress = formatAddress(organization?.primaryAddress);
   const orgLocation = [organization?.city, organization?.country]
     .filter(Boolean)
@@ -348,7 +354,7 @@ export function InvoicePdfDocument({
                 ) : null}
               </View>
               <Text style={[styles.cellAccent, styles.colQty]}>
-                {Number(li.quantity).toFixed(2)}
+                {toNum(li.quantity).toFixed(2)}
               </Text>
               <Text style={[styles.cellAccent, styles.colRate]}>
                 {plain(toNum(li.rate))}
@@ -441,7 +447,7 @@ export function InvoicePdfDocument({
         </View>
 
         {/* Account details */}
-        {bankAccount ? (
+        {bankAccount?.accountNumber ? (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Account Details</Text>
             <Text style={styles.bankAccountNumber}>

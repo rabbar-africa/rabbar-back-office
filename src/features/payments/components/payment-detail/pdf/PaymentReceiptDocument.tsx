@@ -6,7 +6,7 @@ import {
   Image,
   StyleSheet,
 } from '@react-pdf/renderer';
-import { formatMoney } from '@/hooks/useFormatMoney';
+import { formatPdfMoney as formatMoney } from '@/utils/format-pdf-money';
 import { formatAddress } from '@/utils/string-formatter';
 import type { IOrganization } from '@/shared/interface/common';
 import type { IPaymentReceived } from '@/shared/interface/payment';

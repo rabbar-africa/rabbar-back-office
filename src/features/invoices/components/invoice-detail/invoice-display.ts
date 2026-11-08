@@ -20,9 +20,9 @@ export function invoiceVehicleRows(
   const vehicle = invoice.vehicle;
   if (!vehicle) return [];
   return [
-    { label: 'Make', value: vehicle.make ?? '' },
-    { label: 'Model', value: vehicle.model ?? '' },
+    { label: 'Make', value: vehicle.make?.trim() ?? '' },
+    { label: 'Model', value: vehicle.model?.trim() ?? '' },
     { label: 'Year', value: vehicle.year ? String(vehicle.year) : '' },
-    { label: 'Reg. No.', value: vehicle.registrationNumber ?? '' },
+    { label: 'Plate No.', value: vehicle.registrationNumber?.trim() ?? '' },
   ].filter((row) => row.value);
 }

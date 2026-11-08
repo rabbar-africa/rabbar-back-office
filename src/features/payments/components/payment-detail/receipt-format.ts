@@ -6,8 +6,11 @@ import type { IPaymentReceived } from '@/shared/interface/payment';
 export const toNum = (v: string | number | null | undefined) =>
   Number(v ?? 0) || 0;
 
-export const formatReceiptDate = (v?: string | null) =>
-  v ? moment(v).format('DD MMM YYYY') : '—';
+// Dates are stored without a time, so read them in UTC, as the backend's copy does.
+export const formatReceiptDate = (v?: string | null) => {
+  const date = moment.utc(v ?? undefined);
+  return v && date.isValid() ? date.format('DD MMM YYYY') : '—';
+};
 
 export const PAYMENT_MODE_LABELS: Record<string, string> = {
   CASH: 'Cash',
