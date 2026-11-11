@@ -344,7 +344,63 @@ function useInvalidateSubscription() {
       customQueryKey.subscriptions.payments,
       // A plan change can put agreed terms in or out of force.
       customQueryKey.subscriptions.entitlements,
+      // A link paid, or one that a new plan makes impossible to pay.
+      customQueryKey.subscriptions.payLinks,
     ].forEach((key) => queryClient.invalidateQueries({ queryKey: [key] }));
+}
+
+export function useGetPayLinks(
+  id: string,
+  config?: QueryConfigType<typeof organizationsSubscriptionService.getPayLinks>
+) {
+  return useQuery({
+    queryKey: [customQueryKey.subscriptions.payLinks, id],
+    queryFn: () => organizationsSubscriptionService.getPayLinks(id),
+    enabled: !!id,
+    ...config,
+  });
+}
+
+export function useCreatePayLink(
+  config?: MutationConfig<typeof organizationsSubscriptionService.createPayLink>
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: organizationsSubscriptionService.createPayLink,
+    meta: { successMessage: 'Payment link ready' },
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: [customQueryKey.subscriptions.payLinks],
+      }),
+    ...config,
+  });
+}
+
+/** A payment confirmed here changes the plan, so refresh it all. */
+export function useCheckPayLink(
+  config?: MutationConfig<typeof organizationsSubscriptionService.checkPayLink>
+) {
+  const invalidate = useInvalidateSubscription();
+  return useMutation({
+    mutationFn: organizationsSubscriptionService.checkPayLink,
+    onSuccess: invalidate,
+    ...config,
+  });
+}
+
+export function useCancelPayLink(
+  config?: MutationConfig<typeof organizationsSubscriptionService.cancelPayLink>
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: organizationsSubscriptionService.cancelPayLink,
+    meta: { successMessage: 'Payment link cancelled' },
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: [customQueryKey.subscriptions.payLinks],
+      }),
+    ...config,
+  });
 }
 
 export function useGetOrganizationSubscription(

@@ -5,12 +5,15 @@
  * `GET/PATCH/DELETE /back-office/subscriptions/:organizationId/entitlements`.
  */
 
-export type LimitPeriod = 'total' | 'month';
+export type LimitPeriod = 'total' | 'month' | 'year';
 
 export interface LimitRule {
   /** Null: no cap. */
   max: number | null;
-  /** 'total': all of them ever. 'month': created this calendar month (Lagos). */
+  /**
+   * 'total': all of them ever. 'month': created this calendar month, 'year':
+   * this calendar year from 1 January (both Lagos time).
+   */
   per: LimitPeriod;
 }
 

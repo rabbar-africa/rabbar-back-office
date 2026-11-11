@@ -22,6 +22,8 @@ import {
 } from '../../api/query';
 import { AddSubscriptionPaymentModal } from '../AddSubscriptionPaymentModal';
 import { ChangePlanModal } from '../ChangePlanModal';
+import { SendPayLinkModal } from '../SendPayLinkModal';
+import { OrgPayLinksCard } from '../OrgPayLinksCard';
 import { OrgPlanTermsCard } from '../OrgPlanTermsCard';
 import { planPriceLabel } from '@/features/billing/data';
 import { RefreshButton } from '@/components/common/RefreshButton';
@@ -80,6 +82,7 @@ export function OrgSubscriptionTab() {
   const { id } = useParams<{ id: string }>();
   const [payOpen, setPayOpen] = useState(false);
   const [planOpen, setPlanOpen] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
 
   const { data, isPending } = useGetOrganizationSubscription(id!);
@@ -206,15 +209,21 @@ export function OrgSubscriptionTab() {
 
           <Flex gap=".75rem" wrap="wrap">
             <RefreshButton
-              queryKeys={[[customQueryKey.subscriptions.getByOrg, id]]}
+              queryKeys={[
+                [customQueryKey.subscriptions.getByOrg, id],
+                [customQueryKey.subscriptions.payLinks, id],
+              ]}
               label="Reload subscription"
             />
             <Button
               bg="primary.500"
               color="white"
               _hover={{ bg: 'primary.600' }}
-              onClick={() => setPayOpen(true)}
+              onClick={() => setLinkOpen(true)}
             >
+              Send Payment Link
+            </Button>
+            <Button variant="outline" onClick={() => setPayOpen(true)}>
               Add Payment
             </Button>
 
@@ -276,6 +285,8 @@ export function OrgSubscriptionTab() {
         )}
       </Box>
 
+      <OrgPayLinksCard orgId={id!} />
+
       {subscription && (
         <OrgPlanTermsCard
           orgId={id!}
@@ -301,6 +312,12 @@ export function OrgSubscriptionTab() {
       <AddSubscriptionPaymentModal
         open={payOpen}
         onOpenChange={({ open }) => setPayOpen(open)}
+        orgId={id!}
+      />
+
+      <SendPayLinkModal
+        open={linkOpen}
+        onOpenChange={({ open }) => setLinkOpen(open)}
         orgId={id!}
       />
 
