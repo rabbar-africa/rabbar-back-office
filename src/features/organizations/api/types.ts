@@ -100,6 +100,8 @@ export interface IPlan {
   name: string;
   description: string | null;
   monthlyPrice: string;
+  /** A year paid at once; null when the plan isn't sold by the year. */
+  annualPrice?: number | null;
   currency: string;
   isActive: boolean;
   createdAt: string;
@@ -190,6 +192,77 @@ export interface ChangePlanPayload {
 }
 
 export type PlanGrantEnd = 'starter' | 'renew';
+
+export type BillingInterval = 'MONTHLY' | 'ANNUAL';
+
+/**
+ * Where the page after paying sends them first: WHATSAPP ("Back to
+ * WhatsApp", the bot) or WEB ("Log in"). Nothing redirects by itself.
+ */
+export type PayLinkReturn = 'WHATSAPP' | 'WEB';
+
+/** A payment link for one plan, sent to a business that can't pay itself. */
+export interface CreatePayLinkPayload {
+  planTier: string;
+  billingInterval?: BillingInterval;
+  /** Monthly only: a year is already the discount. */
+  promoCode?: string;
+  /** Days after today (Lagos) it still works: 1–30, default 7. */
+  expiresInDays?: number;
+  /**
+   * Left out: WhatsApp when the owner has a number, else the web app.
+   * WHATSAPP for an owner with no WhatsApp number is refused (400).
+   */
+  returnTo?: PayLinkReturn;
+}
+
+/** OPEN until paid, cancelled, or past its last day. */
+export type PayLinkState = 'OPEN' | 'PAID' | 'CANCELLED' | 'EXPIRED';
+
+/** One time the link was opened: each open is its own Paystack checkout. */
+export interface IPayLinkCheckout {
+  reference: string;
+  /** PENDING | SUCCESS | FAILED | ABANDONED */
+  status: string;
+  amount: number;
+  /** card | bank_transfer | ussd …, once paid */
+  channel: string | null;
+  createdAt: string;
+  paidAt: string | null;
+}
+
+export interface IPayLink {
+  id: string;
+  /** The public pay page: no login needed. */
+  url: string;
+  state: PayLinkState;
+  organizationName: string;
+  plan: { tier: string; name: string };
+  billingInterval: BillingInterval;
+  promoCode: string | null;
+  returnTo: PayLinkReturn;
+  /** The end of the last Lagos day it works. */
+  expiresAt: string;
+  paidAt: string | null;
+  cancelledAt: string | null;
+  createdById: string | null;
+  createdAt: string;
+  /** From the list only. */
+  checkouts?: IPayLinkCheckout[];
+}
+
+/** What making a link returns: the link, its price now, and who pays it. */
+export interface ICreatedPayLink extends IPayLink {
+  amount: number;
+  discountAmount: number;
+  currency: string;
+  periodMonths: number;
+  promoDescription: string | null;
+  /** Who it is billed to: the first owner, else the business email. */
+  payer: { email: string; whatsappNumber: string | null };
+  /** Ready to paste into WhatsApp or an email; the link is in it. */
+  shareText: string;
+}
 
 export interface CreateManualPaymentPayload {
   planTier: string;

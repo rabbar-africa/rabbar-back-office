@@ -129,7 +129,7 @@ export function differences(value: PlanEntitlements, base: PlanEntitlements) {
 }
 
 /**
- * "15 invoices", "100 invoices a month", "Unlimited users". Mirrors
+ * "15 invoices", "100 invoices a month", "30,000 invoices a year". Mirrors
  * `limitPhrase` on the API, for values that have not been saved yet.
  */
 export function limitPhrase(
@@ -137,12 +137,15 @@ export function limitPhrase(
   meta: IPlanCatalog['limits'][string]
 ): string {
   if (rule.max === null) return `Unlimited ${meta.many}`;
-  const count = `${rule.max} ${rule.max === 1 ? meta.one : meta.many}`;
+  const count = `${rule.max.toLocaleString('en-US')} ${rule.max === 1 ? meta.one : meta.many}`;
   if (meta.perDocumentType) return `${count} per document type`;
-  return rule.per === 'month' ? `${count} a month` : count;
+  if (rule.per === 'month') return `${count} a month`;
+  if (rule.per === 'year') return `${count} a year`;
+  return count;
 }
 
 export const PERIOD_LABELS: Record<LimitPeriod, string> = {
   total: 'In total',
   month: 'A month',
+  year: 'A year',
 };

@@ -24,6 +24,9 @@ import type {
   IOrganizationSubscription,
   CreateManualPaymentPayload,
   ChangePlanPayload,
+  CreatePayLinkPayload,
+  ICreatedPayLink,
+  IPayLink,
   ConfirmOrganizationDeletionPayload,
   IOrganizationDeletionRequest,
   IOrganizationDeletionResult,
@@ -313,6 +316,45 @@ export const organizationsSubscriptionService = {
     const response = await axios.patch<ApiResponse<IOrganizationSubscription>>(
       `back-office/subscriptions/${data.id}/plan`,
       data.payload
+    );
+    return response.data;
+  },
+
+  /**
+   * A payment link for one plan, for a business that can't get through
+   * checkout itself. Nothing is charged until they open it and pay.
+   */
+  createPayLink: async (data: {
+    id: string;
+    payload: CreatePayLinkPayload;
+  }) => {
+    const response = await axios.post<ApiResponse<ICreatedPayLink>>(
+      `back-office/subscriptions/${data.id}/pay-links`,
+      data.payload
+    );
+    return response.data;
+  },
+
+  /** The business's payment links, newest first, with each Paystack attempt. */
+  getPayLinks: async (id: string) => {
+    const response = await axios.get<ApiResponse<IPayLink[]>>(
+      `back-office/subscriptions/${id}/pay-links`
+    );
+    return response.data;
+  },
+
+  /** "They say they've paid": ask Paystack about the link's payments. */
+  checkPayLink: async (data: { id: string; linkId: string }) => {
+    const response = await axios.post<
+      ApiResponse<{ confirmed: number; link?: IPayLink }>
+    >(`back-office/subscriptions/${data.id}/pay-links/${data.linkId}/check`);
+    return response.data;
+  },
+
+  /** Stop a link working. A paid one can't be cancelled. */
+  cancelPayLink: async (data: { id: string; linkId: string }) => {
+    const response = await axios.delete<ApiResponse<IPayLink>>(
+      `back-office/subscriptions/${data.id}/pay-links/${data.linkId}`
     );
     return response.data;
   },
