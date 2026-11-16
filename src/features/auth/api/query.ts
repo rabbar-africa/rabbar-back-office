@@ -1,6 +1,10 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { authService } from './service';
-import type { LoginCredentials, RegisterPayload } from './types';
+import type {
+  LoginCredentials,
+  RegisterPayload,
+  VerifySignInPayload,
+} from './types';
 import {
   setAccessToken,
   setRefreshToken,
@@ -9,10 +13,21 @@ import {
 import { toaster } from '@/components/ui';
 import { RouteConstants } from '@/shared/constants/routes';
 
+/** Sign-in step 1: checks the password and emails a code. No tokens yet. */
 export function useLoginMutation() {
   return useMutation({
     mutationFn: (credentials: LoginCredentials) =>
       authService.login(credentials),
+  });
+}
+
+/** Sign-in step 2: the emailed code signs the admin in. */
+export function useVerifySignInMutation() {
+  return useMutation({
+    mutationFn: (payload: VerifySignInPayload) =>
+      authService.verifySignIn(payload),
+    // The code screen shows what went wrong beside the code.
+    meta: { skipErrorToast: true },
     onSuccess: (data) => {
       setAccessToken(data.accessToken);
       setRefreshToken(data.refreshToken);

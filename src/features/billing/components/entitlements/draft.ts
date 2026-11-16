@@ -2,6 +2,7 @@ import type {
   EntitlementChanges,
   IEntitlementRows,
   IPlanCatalog,
+  LimitAfter,
   LimitPeriod,
   LimitRule,
   PlanEntitlements,
@@ -13,11 +14,17 @@ import type {
  * shipped default; for a business it is its plan.
  */
 
-/** A limit as the form holds it: the number as typed. */
+/** A limit as the form holds it: the numbers as typed. */
 export interface LimitDraft {
   max: string;
   unlimited: boolean;
   per: LimitPeriod;
+  /**
+   * After a capped total, how many come each `thenPer` ("15, then 3 a
+   * month"). Blank: nothing after the total.
+   */
+  thenMax: string;
+  thenPer: LimitAfter['per'];
 }
 
 export interface EntitlementsDraft {
@@ -28,7 +35,12 @@ export interface EntitlementsDraft {
 export const fromRows = (rows: IEntitlementRows): PlanEntitlements => ({
   features: Object.fromEntries(rows.features.map((r) => [r.key, r.included])),
   limits: Object.fromEntries(
-    rows.limits.map((r) => [r.key, { max: r.max, per: r.per }])
+    rows.limits.map((r) => [
+      r.key,
+      r.then
+        ? { max: r.max, per: r.per, then: r.then }
+        : { max: r.max, per: r.per },
+    ])
   ),
 });
 
@@ -59,7 +71,28 @@ export const toLimitDraft = (rule: LimitRule): LimitDraft => ({
   max: rule.max === null ? '' : String(rule.max),
   unlimited: rule.max === null,
   per: rule.per,
+  thenMax: rule.then ? String(rule.then.max) : '',
+  thenPer: rule.then?.per ?? 'month',
 });
+
+/** Whether a "then" can go with this limit: only after a capped total. */
+export const canHaveThen = (limit: Pick<LimitDraft, 'unlimited' | 'per'>) =>
+  !limit.unlimited && limit.per === 'total';
+
+/**
+ * The rule a limit's form stands for, or undefined while a number is not a
+ * whole number yet. A "then" on a limit that cannot have one is dropped.
+ */
+export function draftRule(limit: LimitDraft): LimitRule | undefined {
+  if (limit.unlimited) return { max: null, per: limit.per };
+  const typed = limit.max.trim();
+  if (!/^\d+$/.test(typed)) return undefined;
+  const rule: LimitRule = { max: Number(typed), per: limit.per };
+  const thenTyped = limit.thenMax.trim();
+  if (!canHaveThen(limit) || !thenTyped) return rule;
+  if (!/^\d+$/.test(thenTyped)) return undefined;
+  return { ...rule, then: { max: Number(thenTyped), per: limit.thenPer } };
+}
 
 /** The form's values, or what is wrong with each limit (by key). */
 export function parseDraft(
@@ -70,23 +103,26 @@ export function parseDraft(
   const errors: Record<string, string> = {};
   const limits: Record<string, LimitRule> = {};
   for (const [key, limit] of Object.entries(draft.limits)) {
-    if (limit.unlimited) {
-      limits[key] = { max: null, per: limit.per };
+    const rule = draftRule(limit);
+    if (rule) {
+      limits[key] = rule;
       continue;
     }
-    const typed = limit.max.trim();
-    if (!/^\d+$/.test(typed)) {
-      errors[key] = 'Enter a whole number, or tick No cap';
-      continue;
-    }
-    limits[key] = { max: Number(typed), per: limit.per };
+    errors[key] = /^\d+$/.test(limit.max.trim())
+      ? 'Enter a whole number after "then", or leave it blank'
+      : 'Enter a whole number, or tick No cap';
   }
   if (Object.keys(errors).length) return { ok: false, errors };
   return { ok: true, value: { features: { ...draft.features }, limits } };
 }
 
+const sameThen = (a?: LimitAfter | null, b?: LimitAfter | null) =>
+  (!a && !b) || Boolean(a && b && a.max === b.max && a.per === b.per);
+
 export const sameRule = (a?: LimitRule, b?: LimitRule) =>
-  Boolean(a && b && a.max === b.max && a.per === b.per);
+  Boolean(
+    a && b && a.max === b.max && a.per === b.per && sameThen(a.then, b.then)
+  );
 
 /**
  * What to send: only entries that changed since the form opened. One that
@@ -129,8 +165,9 @@ export function differences(value: PlanEntitlements, base: PlanEntitlements) {
 }
 
 /**
- * "15 invoices", "100 invoices a month", "30,000 invoices a year". Mirrors
- * `limitPhrase` on the API, for values that have not been saved yet.
+ * "15 invoices", "100 invoices a month", "30,000 invoices a year", "15
+ * invoices, then 3 a month". Mirrors `limitPhrase` on the API, for values
+ * that have not been saved yet.
  */
 export function limitPhrase(
   rule: LimitRule,
@@ -141,6 +178,8 @@ export function limitPhrase(
   if (meta.perDocumentType) return `${count} per document type`;
   if (rule.per === 'month') return `${count} a month`;
   if (rule.per === 'year') return `${count} a year`;
+  if (rule.then)
+    return `${count}, then ${rule.then.max.toLocaleString('en-US')} a ${rule.then.per}`;
   return count;
 }
 

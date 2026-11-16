@@ -1,21 +1,47 @@
-import { Box, Button, Flex, Heading, Text, VStack } from '@chakra-ui/react';
-import { useEffect } from 'react';
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Spinner,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
 import { Link, useRouteError } from 'react-router-dom';
+import {
+  isChunkLoadError,
+  isReloadingForNewDeploy,
+  reloadForNewDeploy,
+} from '../../utils/chunk-reload';
 
 export const RouteError = () => {
   const error: any = useRouteError();
 
-  useEffect(() => {
-    if (error) {
-      const errorMessage =
-        error.statusText?.toLowerCase() || error.message?.toLowerCase();
-      const reloadMessage = 'failed to fetch dynamically imported module';
+  // Starts on the loader, and shows the error only once it is known to be a
+  // real one: a stale deploy must never put the error screen up, even briefly.
+  const [showError, setShowError] = useState(false);
 
-      if (errorMessage?.includes(reloadMessage)) {
-        window.location.reload();
-      }
-    }
+  useEffect(() => {
+    // The page is already being replaced, whatever this error says.
+    if (isReloadingForNewDeploy()) return;
+
+    const isStale =
+      isChunkLoadError(error?.statusText) || isChunkLoadError(error?.message);
+    // A false reload means it already reloaded and that did not help, so show
+    // the error rather than looping.
+    if (isStale && reloadForNewDeploy()) return;
+
+    setShowError(true);
   }, [error]);
+
+  if (!showError) {
+    return (
+      <Flex h="100vh" w="full" justifyContent="center" alignItems="center">
+        <Spinner size="xl" color="primary" />
+      </Flex>
+    );
+  }
 
   return (
     <Box h="100vh" w="full" overflow="hidden" position="relative" bg={'white'}>

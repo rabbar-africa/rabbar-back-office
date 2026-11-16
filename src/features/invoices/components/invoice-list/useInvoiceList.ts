@@ -20,7 +20,8 @@ const FILTER_SCHEMA = {
   status: { defaultValue: '' },
 };
 
-export function useInvoiceList() {
+/** One business's invoices (the API requires `organizationId`). */
+export function useInvoiceList(organizationId: string) {
   const navigate = useNavigate();
   const [filters, setFilters] = useUrlState(FILTER_SCHEMA, { replace: true });
   const [searchInput, setSearchInput] = useState(filters.search);
@@ -50,9 +51,10 @@ export function useInvoiceList() {
     [downloadPdf]
   );
 
-  // Every organization's invoices. The back-office endpoint has no date-range
-  // filter, so the list offers search and status only.
+  // The back-office endpoint has no date-range filter, so the list offers
+  // search and status only.
   const { data, isLoading, isFetching } = useGetBackOfficeInvoicesQuery({
+    organizationId,
     page: filters.page,
     limit: filters.limit,
     ...(filters.search ? { search: filters.search } : {}),
@@ -86,18 +88,6 @@ export function useInvoiceList() {
         value: 'edit',
         onClick: (invoice) =>
           navigate(RouteConstants.invoices.detail.generate({ id: invoice.id })),
-      },
-      {
-        label: 'Open organization',
-        value: 'organization',
-        onClick: (invoice) =>
-          navigate(
-            RouteConstants.organizations.detail.generate(
-              { id: invoice.organization?.id ?? '' },
-              { tab: 'invoices' }
-            )
-          ),
-        disabled: (invoice) => !invoice.organization?.id,
       },
       {
         label: 'Download PDF',

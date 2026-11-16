@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Box, Button, Flex, Stack, Text } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { CustomTable } from '@/components/table';
@@ -12,13 +11,32 @@ import {
 } from '@/features/invoices/components/invoice-list/columns';
 import { InvoiceFilters } from '@/features/invoices/components/invoice-list/InvoiceFilters';
 import { DeleteInvoiceConfirm } from '@/features/invoices/components/invoice-list/DeleteInvoiceConfirm';
-import { organizationColumn } from '@/features/organizations/components/organization-column';
+import { OneBusinessGate } from '@/features/organizations/components/OneBusinessGate';
 import { RefreshButton } from '@/components/common/RefreshButton';
 import { customQueryKey } from '@/shared/constants/query-keys';
-import type { IInvoiceResponse } from '@/shared/interface/invoice';
 
+/** One business's invoices at a time. */
 export function InvoiceListTemplate() {
   const navigate = useNavigate();
+  return (
+    <Stack gap="6">
+      <PageHeader
+        title="Invoices"
+        subtitle="A business's invoices"
+        action={
+          <Button onClick={() => navigate(RouteConstants.invoices.create.path)}>
+            New Invoice
+          </Button>
+        }
+      />
+      <OneBusinessGate records="invoices" tab="invoices">
+        {(business) => <InvoiceList organizationId={business.id} />}
+      </OneBusinessGate>
+    </Stack>
+  );
+}
+
+function InvoiceList({ organizationId }: { organizationId: string }) {
   const {
     invoices,
     meta,
@@ -43,18 +61,9 @@ export function InvoiceListTemplate() {
     confirmDelete,
     cancelDelete,
     isDeleting,
-  } = useInvoiceList();
+  } = useInvoiceList(organizationId);
 
-  const baseColumns = useInvoiceListColumns();
-  // Cross-organization list: say whose invoice each row is, after Invoice #.
-  const columns = useMemo(
-    () => [
-      baseColumns[0],
-      organizationColumn<IInvoiceResponse>('invoices'),
-      ...baseColumns.slice(1),
-    ],
-    [baseColumns]
-  );
+  const columns = useInvoiceListColumns();
 
   const selectionCount = selectedInvoices.length;
   const downloadFilename =
@@ -66,94 +75,67 @@ export function InvoiceListTemplate() {
 
   return (
     <>
-      <Stack gap="6">
-        <PageHeader
-          title="Invoices"
-          subtitle="Every organization's invoices"
-          action={
-            <Flex gap="2" wrap="wrap">
-              <DownloadButton
-                data={csvData}
-                filename={downloadFilename}
-                headers={INVOICE_CSV_HEADERS}
-                label={downloadLabel}
-              />
-              <Button
-                onClick={() => navigate(RouteConstants.invoices.create.path)}
-              >
-                New Invoice
-              </Button>
-            </Flex>
-          }
-        />
-
-        <Box
-          pt={{ base: '1.25rem', md: '2rem' }}
-          pb={{ base: '1.25rem', md: '2rem' }}
-          bg="white"
-          px={{ base: '0.75rem', md: '1rem' }}
-          rounded=".625rem"
-          shadow="sm"
-          borderWidth="1px"
-          borderColor="gray.75"
-        >
-          <Flex justify="space-between" align="center" mb="1rem">
-            <Box>
-              <Text
-                textStyle={{ base: 'default-bold', md: 'large-bold' }}
-                color="gray.500"
-              >
-                All Invoices
-              </Text>
-              <Text textStyle="small-regular" color="gray.300">
-                {selectionCount > 0
-                  ? `${selectionCount} selected`
-                  : 'Click a row to view invoice details'}
-              </Text>
-            </Box>
-            <RefreshButton
-              queryKeys={[[customQueryKey.invoices.getAll]]}
-              label="Reload invoices"
-            />
-          </Flex>
-
-          <InvoiceFilters
-            searchInput={searchInput}
-            onSearchInputChange={setSearchInput}
-            onSearchCommit={handleSearchCommit}
-            status={filters.status}
-            onStatusChange={(val) => setFilters({ status: val, page: 1 })}
-            isLoading={isFetching}
-          />
-
-          <Box overflowX="auto" minW={0}>
-            <CustomTable
-              stickyHeader
-              data={invoices}
-              columns={columns}
-              loading={isLoading}
-              enableRowSelection
-              rowSelection={rowSelection}
-              onRowSelectionChange={setRowSelection}
-              getRowId={(row) => row.id}
-              enableActions
-              actions={tableActions}
-              onRowClick={(row) => navigateToDetail(row.original)}
-              pagination={{
-                pageIndex: filters.page - 1,
-                pageSize: filters.limit,
-              }}
-              setPagination={({ pageIndex }) =>
-                setFilters({ page: pageIndex + 1 })
-              }
-              pageCount={meta?.totalPages ?? 1}
-              totalItems={meta?.total}
-              hasNextPage={filters.page < (meta?.totalPages ?? 1)}
-              hasPrevPage={filters.page > 1}
-            />
-          </Box>
+      <Flex justify="space-between" align="center" mb="1rem">
+        <Box>
+          <Text
+            textStyle={{ base: 'default-bold', md: 'large-bold' }}
+            color="gray.500"
+          >
+            Invoices
+          </Text>
+          <Text textStyle="small-regular" color="gray.300">
+            {selectionCount > 0
+              ? `${selectionCount} selected`
+              : 'Click a row to view invoice details'}
+          </Text>
         </Box>
-      </Stack>
+        <Flex gap="2" align="center" wrap="wrap">
+          <DownloadButton
+            data={csvData}
+            filename={downloadFilename}
+            headers={INVOICE_CSV_HEADERS}
+            label={downloadLabel}
+          />
+          <RefreshButton
+            queryKeys={[[customQueryKey.invoices.getAll]]}
+            label="Reload invoices"
+          />
+        </Flex>
+      </Flex>
+
+      <InvoiceFilters
+        searchInput={searchInput}
+        onSearchInputChange={setSearchInput}
+        onSearchCommit={handleSearchCommit}
+        status={filters.status}
+        onStatusChange={(val) => setFilters({ status: val, page: 1 })}
+        isLoading={isFetching}
+      />
+
+      <Box overflowX="auto" minW={0}>
+        <CustomTable
+          stickyHeader
+          data={invoices}
+          columns={columns}
+          loading={isLoading}
+          enableRowSelection
+          rowSelection={rowSelection}
+          onRowSelectionChange={setRowSelection}
+          getRowId={(row) => row.id}
+          enableActions
+          actions={tableActions}
+          onRowClick={(row) => navigateToDetail(row.original)}
+          pagination={{
+            pageIndex: filters.page - 1,
+            pageSize: filters.limit,
+          }}
+          setPagination={({ pageIndex }) => setFilters({ page: pageIndex + 1 })}
+          pageCount={meta?.totalPages ?? 1}
+          totalItems={meta?.total}
+          hasNextPage={filters.page < (meta?.totalPages ?? 1)}
+          hasPrevPage={filters.page > 1}
+        />
+      </Box>
 
       <DeleteInvoiceConfirm
         target={

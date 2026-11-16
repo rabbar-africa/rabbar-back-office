@@ -1,9 +1,5 @@
 import { RouteConstants } from '@/shared/constants/routes';
 import { DashboardIcon } from '@/assets/custom/DashboardIcon';
-import { TaskIcon } from '@/assets/custom/TasksIcon';
-import { FileTextIcon } from '@/assets/custom/FileTextIcon';
-import { Money } from '@/assets/custom/Money';
-import { UsersIcon } from '@/assets/custom/UsersIcon';
 import { BriefCase } from '@/assets/custom/BriefCase';
 import { ClipboardTextIcon } from '@/assets/custom/ClipboardTextIcon';
 import { ChartBar } from '@/assets/custom/ChartBar';
@@ -13,8 +9,20 @@ import { ShieldIcon } from '@/assets/custom/ShieldIcon';
 import { TagIcon } from '@/assets/custom/TagIcon';
 import { CalendarDotsIcon } from '@/assets/custom/CalendarDotsIcon';
 import { ChatCircle } from '@/assets/custom/ChatCircle';
+import { UsersThree } from '@/assets/custom/UsersThree';
+import { ClockCounterClockwise } from '@/assets/custom/ClockCounterClockwise';
 
-export const sideBarItems = [
+export interface SideBarItem {
+  name: string;
+  icon: React.ElementType;
+  href: string;
+  slug: string;
+  paths: string[];
+  /** Super admins only: the owners (GET back-office/admins/me → canManageAdmins). */
+  ownersOnly?: boolean;
+}
+
+export const sideBarItems: SideBarItem[] = [
   {
     name: 'Dashboard',
     icon: DashboardIcon,
@@ -27,7 +35,15 @@ export const sideBarItems = [
     icon: BuildingIcon,
     href: RouteConstants.organizations.base.path,
     slug: 'organizations',
-    paths: [RouteConstants.organizations.base.path],
+    // Invoices, payments, inspections and customers are reached from a
+    // business's tabs, so their pages keep Organizations highlighted.
+    paths: [
+      RouteConstants.organizations.base.path,
+      RouteConstants.invoices.base.path,
+      RouteConstants.payments.base.path,
+      RouteConstants.inspection.base.path,
+      RouteConstants.customers.base.path,
+    ],
   },
   {
     name: 'Billing',
@@ -51,34 +67,6 @@ export const sideBarItems = [
     paths: [RouteConstants.whatsapp.base.path],
   },
   {
-    name: 'Inspection',
-    icon: TaskIcon,
-    href: RouteConstants.inspection.base.path,
-    slug: 'inspection',
-    paths: [RouteConstants.inspection.base.path],
-  },
-  {
-    name: 'Invoices',
-    icon: FileTextIcon,
-    href: RouteConstants.invoices.base.path,
-    slug: 'invoices',
-    paths: [RouteConstants.invoices.base.path],
-  },
-  {
-    name: 'Payments Received',
-    icon: Money,
-    href: RouteConstants.payments.base.path,
-    slug: 'payments',
-    paths: [RouteConstants.payments.base.path],
-  },
-  {
-    name: 'Customers',
-    icon: UsersIcon,
-    href: RouteConstants.customers.base.path,
-    slug: 'customers',
-    paths: [RouteConstants.customers.base.path],
-  },
-  {
     name: 'Items / Services',
     icon: BriefCase,
     href: RouteConstants.items.base.path,
@@ -98,6 +86,22 @@ export const sideBarItems = [
     href: RouteConstants.access.base.path,
     slug: 'access-control',
     paths: [RouteConstants.access.base.path],
+  },
+  {
+    name: 'Admins',
+    icon: UsersThree,
+    href: RouteConstants.admins.base.path,
+    slug: 'admins',
+    paths: [RouteConstants.admins.base.path],
+    ownersOnly: true,
+  },
+  {
+    name: 'Access Log',
+    icon: ClockCounterClockwise,
+    href: RouteConstants.accessLog.base.path,
+    slug: 'access-log',
+    paths: [RouteConstants.accessLog.base.path],
+    ownersOnly: true,
   },
   {
     name: 'Reports',

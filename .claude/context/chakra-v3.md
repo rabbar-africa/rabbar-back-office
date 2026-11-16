@@ -222,3 +222,31 @@ export const buttonRecipe = defineRecipe({
 ```
 
 After editing recipes: `yarn gen:theme-typings`.
+
+---
+
+## Buttons: never `variant="plain"`
+
+The project's button recipe (`src/theme/recipe/button-recipe.ts`) has no
+`plain` variant, so `<Button variant="plain">` falls back to the filled base
+(primary background) and the text disappears into it. For a text or link
+style button use `variant="ghost"` and strip the padding:
+
+```tsx
+<Button
+  variant="ghost"
+  p="0"
+  h="auto"
+  minW={0}
+  color="primary.300"
+  _hover={{ textDecoration: 'underline' }}
+  _loading={{ bg: 'transparent' }}          // base _loading sets a fill
+  _disabled={{ bg: 'transparent', color: 'gray.300' }}
+>
+  Send a new code
+</Button>
+```
+
+Only use variants the recipe defines: `primary`, `secondary`, `outline`,
+`outlineSecondary`, `ghost`, `ghostGroup`, `errorSolid`. (`variant="plain"`
+on `Tabs.Root` is fine: that's the Tabs recipe, not Button.)

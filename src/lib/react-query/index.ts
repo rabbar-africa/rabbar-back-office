@@ -41,8 +41,9 @@ export const queryClient = new QueryClient({
         });
       }
     },
-    onError: (error) => {
-      // console.log('in global config error');
+    onError: (error, _variables, _context, mutation) => {
+      // A screen that shows the error itself (e.g. the sign-in code) opts out.
+      if (mutation.meta?.skipErrorToast) return;
 
       toaster.create({
         description: getErrorMessage(error),

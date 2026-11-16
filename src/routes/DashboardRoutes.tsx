@@ -17,6 +17,7 @@ import { ItemRoutes } from '@/features/items/routes';
 import { ExpenseRoutes } from '@/features/expenses/routes';
 import { ReportRoutes } from '@/features/reports/routes';
 import { SettingsRoutes } from '@/features/settings/routes';
+import { AdminRoutes } from '@/features/admins/routes';
 
 const { Overview } = lazyImport(
   () => import('../features/overview/pages/Overview'),
@@ -54,6 +55,7 @@ export const DashboardRoutes: RouteObject = {
     ...ExpenseRoutes,
     ...ReportRoutes,
     ...SettingsRoutes,
+    ...AdminRoutes,
     // Anything else under the dashboard: a 404 inside the app layout.
     { path: '*', element: <NotFound /> },
   ],

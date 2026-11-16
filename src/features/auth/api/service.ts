@@ -5,18 +5,35 @@ import type {
   RefreshTokenResponse,
   RegisterPayload,
   RegisterResponse,
+  SignInChallenge,
+  VerifySignInPayload,
 } from './types';
 import { type ApiResponse } from '@/shared/interface/api';
 import { type IUser } from '@/shared/interface/user';
 
 export const authService = {
-  login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
-    const response = await axios.post<{ data: LoginResponse }>(
+  /**
+   * Sign-in step 1: email and password. Issues no tokens: the API emails a
+   * 6-digit code and returns the challenge to check it against.
+   */
+  login: async (credentials: LoginCredentials): Promise<SignInChallenge> => {
+    const response = await axios.post<{ data: SignInChallenge }>(
       'back-office/auth/login',
       {
         email: credentials.email.trim(),
         password: credentials.password,
       }
+    );
+    return response.data.data;
+  },
+
+  /** Sign-in step 2: the emailed code → the session. */
+  verifySignIn: async (
+    payload: VerifySignInPayload
+  ): Promise<LoginResponse> => {
+    const response = await axios.post<{ data: LoginResponse }>(
+      'back-office/auth/verify',
+      { challengeId: payload.challengeId, code: payload.code.trim() }
     );
     return response.data.data;
   },
