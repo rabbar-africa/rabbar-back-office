@@ -1,49 +1,19 @@
-import { Button, Flex, Heading } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
-import { type ColumnDef } from '@tanstack/react-table';
-import { CustomTable } from '@/components/table';
-import Status from '@/components/common/Status';
-import { RouteConstants } from '@/shared/constants/routes';
-import type { ICustomer } from '@/shared/interface/customer';
-import { customersData } from '../data';
+import { Stack } from '@chakra-ui/react';
+import { PageHeader } from '@/components/common/PageHeader';
+import { OneBusinessGate } from '@/features/organizations/components/OneBusinessGate';
+import { OrgCustomersTab } from '@/features/organizations/components/tabs/OrgCustomersTab';
 
-const columns: ColumnDef<ICustomer, any>[] = [
-  { accessorKey: 'displayName', header: 'Name' },
-  { accessorKey: 'company', header: 'Company' },
-  { accessorKey: 'email', header: 'Email' },
-  { accessorKey: 'phone', header: 'Phone' },
-  { accessorKey: 'stage', header: 'Stage' },
-  {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ getValue }) => <Status name={getValue() as string} />,
-  },
-];
-
+/** One business's customers at a time. */
 export function CustomersTemplate() {
-  const navigate = useNavigate();
-
   return (
-    <Flex direction="column" gap="1.5rem">
-      <Flex justify="space-between" align="center" wrap="wrap" gap="1rem">
-        <Heading fontSize="1.5rem" fontWeight="600">
-          Customers
-        </Heading>
-        <Button
-          bg="primary.500"
-          color="white"
-          _hover={{ bg: 'primary.600' }}
-          onClick={() => navigate(RouteConstants.customers.create.path)}
-        >
-          Add Customer
-        </Button>
-      </Flex>
-
-      <CustomTable
-        data={customersData}
-        columns={columns}
-        NoDataText="No customers yet"
-      />
-    </Flex>
+    <Stack gap="6">
+      <PageHeader title="Customers" subtitle="A business's customers" />
+      {/* No prefix, so the gate's page reset applies to this list. */}
+      <OneBusinessGate records="customers" tab="customers">
+        {(business) => (
+          <OrgCustomersTab organizationId={business.id} urlPrefix="" />
+        )}
+      </OneBusinessGate>
+    </Stack>
   );
 }

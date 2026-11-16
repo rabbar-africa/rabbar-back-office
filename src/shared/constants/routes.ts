@@ -28,6 +28,8 @@ const auth = {
   signup: defineRoute('/auth/signup' as const),
   forgotPassword: defineRoute('/auth/forgot-password' as const),
   resetPassword: defineRoute('/auth/reset-password' as const),
+  /** Public. The API's invite email links here (BACK_OFFICE_URL/accept-invite). */
+  acceptInvite: defineRoute('/accept-invite' as const),
 } as const;
 
 const overview = {
@@ -170,8 +172,20 @@ const settings = {
   editTeamMember: defineRoute('/settings/team-management/:id/edit' as const),
 } as const;
 
+/** Platform admins (everyone sees the list; owners add and deactivate). */
+const admins = {
+  base: defineRoute('/admins' as const),
+} as const;
+
+/** What admins opened and changed. Owners only. */
+const accessLog = {
+  base: defineRoute('/access-log' as const),
+} as const;
+
 export const RouteConstants = {
   auth,
+  admins,
+  accessLog,
   overview,
   inspection,
   invoices,

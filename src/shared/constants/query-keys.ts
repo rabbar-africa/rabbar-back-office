@@ -103,6 +103,12 @@ export const customQueryKey = {
     statement: 'get-account-statement',
     business: 'get-business-statement',
   },
+  admins: {
+    me: 'get-admin-permissions',
+    getAll: 'get-all-admins',
+    accessLog: 'get-admin-access-log',
+    invite: 'get-admin-invite',
+  },
   whatsapp: {
     usage: 'get-whatsapp-usage',
     activity: 'get-whatsapp-activity',

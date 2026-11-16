@@ -24,11 +24,15 @@ import { ThreeDotsIcon } from '@/assets/custom/ThreeDotsIcon';
 import { CaretRight } from '@/assets/custom/CaretRight';
 import { BooksIcon } from '@/assets/custom/BooksIcon';
 import { NotebookIcon } from '@/assets/custom/NotebookIcon';
+import { ClockCounterClockwise } from '@/assets/custom/ClockCounterClockwise';
+import { useAdminPermissions } from '@/features/admins/api';
 
 interface OrgTab {
   value: string;
   label: string;
   icon: ElementType;
+  /** Shown to the back-office owners only. */
+  ownersOnly?: boolean;
 }
 
 /**
@@ -48,7 +52,19 @@ export const ORG_DETAIL_TABS: OrgTab[] = [
   { value: 'subscription', label: 'Subscription', icon: CalendarDotsIcon },
   { value: 'items', label: 'Items', icon: BriefCase },
   { value: 'roles', label: 'Roles & Permissions', icon: ShieldIcon },
+  {
+    value: 'access-log',
+    label: 'Access Log',
+    icon: ClockCounterClockwise,
+    ownersOnly: true,
+  },
 ];
+
+/** The tabs this admin may see: owners also get the access log. */
+export function useOrgDetailTabs(): OrgTab[] {
+  const { canManageAdmins } = useAdminPermissions();
+  return ORG_DETAIL_TABS.filter((t) => !t.ownersOnly || canManageAdmins);
+}
 
 /** Page background, so the stuck bar hides content scrolling under it. */
 const PAGE_BG = '#F7F7F7';
@@ -66,10 +82,11 @@ interface OrgDetailsTabBarProps {
 export function OrgDetailsTabBar({ value, onChange }: OrgDetailsTabBarProps) {
   // How many tabs fit on the bar without squeezing, beside the sidebar.
   const primaryCount = useBreakpointValue({ base: 5, xl: 6, '2xl': 8 }) ?? 5;
-  const primaryTabs = ORG_DETAIL_TABS.slice(0, primaryCount);
-  const overflowTabs = ORG_DETAIL_TABS.slice(primaryCount);
+  const tabs = useOrgDetailTabs();
+  const primaryTabs = tabs.slice(0, primaryCount);
+  const overflowTabs = tabs.slice(primaryCount);
 
-  const active = ORG_DETAIL_TABS.find((t) => t.value === value);
+  const active = tabs.find((t) => t.value === value);
   const activeOverflow = overflowTabs.find((t) => t.value === value);
 
   return (
@@ -119,7 +136,7 @@ export function OrgDetailsTabBar({ value, onChange }: OrgDetailsTabBarProps) {
               onChange={(e) => onChange(e.target.value)}
               aria-label="Select section"
             >
-              {ORG_DETAIL_TABS.map((t) => (
+              {tabs.map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.label}
                 </option>

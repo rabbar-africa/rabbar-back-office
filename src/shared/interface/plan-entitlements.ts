@@ -15,6 +15,17 @@ export interface LimitRule {
    * this calendar year from 1 January (both Lagos time).
    */
   per: LimitPeriod;
+  /**
+   * Only after a capped 'total': what comes once it is used, for good.
+   * Starter's invoices are 15, then 3 a month. Absent or null: nothing after.
+   */
+  then?: LimitAfter | null;
+}
+
+/** The allowance after a starting total, a month or a year. */
+export interface LimitAfter {
+  max: number;
+  per: 'month' | 'year';
 }
 
 /** On/off things a plan can include, in catalog order. */
@@ -32,7 +43,9 @@ export interface IPlanLimitRow {
   label: string;
   max: number | null;
   per: LimitPeriod;
-  /** Ready to print, e.g. "100 invoices a month". */
+  /** After a 'total' start: what comes each month or year. */
+  then?: LimitAfter | null;
+  /** Ready to print, e.g. "100 invoices a month", "15 invoices, then 3 a month". */
   phrase: string;
   comingSoon: boolean;
 }

@@ -31,9 +31,10 @@ import { OrgBankingTab } from '../components/tabs/OrgBankingTab';
 import { OrgExpensesTab } from '../components/tabs/OrgExpensesTab';
 import { DeleteOrganizationModal } from '../components/DeleteOrganizationModal';
 import {
-  ORG_DETAIL_TABS,
   OrgDetailsTabBar,
+  useOrgDetailTabs,
 } from '../components/OrgDetailsTabBar';
+import { AccessLogTable } from '@/features/admins/components/AccessLogTable';
 
 const TAB_SCHEMA = { tab: { defaultValue: 'invoices' } };
 
@@ -42,7 +43,8 @@ export function OrganizationDetailsTemplate() {
   const { id } = useParams<{ id: string }>();
   const [{ tab }, setUrlState] = useUrlState(TAB_SCHEMA, { replace: true });
   // An unknown ?tab= (old link, typo) falls back instead of showing nothing.
-  const activeTab = ORG_DETAIL_TABS.some((t) => t.value === tab)
+  const tabs = useOrgDetailTabs();
+  const activeTab = tabs.some((t) => t.value === tab)
     ? tab
     : TAB_SCHEMA.tab.defaultValue;
 
@@ -165,6 +167,24 @@ export function OrganizationDetailsTemplate() {
           </Tabs.Content>
           <Tabs.Content value="roles">
             {activeTab === 'roles' && <OrgRolesTab />}
+          </Tabs.Content>
+          <Tabs.Content value="access-log">
+            {activeTab === 'access-log' && id && (
+              <Box
+                py={{ base: '1.25rem', md: '1.5rem' }}
+                px={{ base: '0.75rem', md: '1rem' }}
+                bg="white"
+                rounded=".625rem"
+                borderWidth="1px"
+                borderColor="gray.75"
+              >
+                <Text textStyle="small-regular" color="gray.300" mb="1rem">
+                  Every time an admin opened or changed this business's records.
+                  Kept for two years.
+                </Text>
+                <AccessLogTable organizationId={id} urlPrefix="log_" />
+              </Box>
+            )}
           </Tabs.Content>
           <Tabs.Content value="settings">
             {activeTab === 'settings' && (

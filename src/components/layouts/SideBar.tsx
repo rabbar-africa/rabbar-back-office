@@ -8,6 +8,7 @@ import { Logo } from '../common/Logo';
 import { sideBarItems } from '@/shared/data';
 import { CaretLeft } from '@/assets/custom/CaretLeft';
 import { CaretRight } from '@/assets/custom/CaretRight';
+import { useAdminPermissions } from '@/features/admins/api';
 
 interface SidebarProps {
   mobile?: boolean;
@@ -24,6 +25,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const currentRoute = useLocation();
   const navigate = useNavigate();
+  const { canManageAdmins } = useAdminPermissions();
+  const items = sideBarItems.filter(
+    (item) => !item.ownersOnly || canManageAdmins
+  );
 
   const handleLogout = () => {
     removeToken();
@@ -71,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Nav items */}
       <Flex pt={'2rem'} bg={'primary.500'} flexDirection="column" flex="1">
-        {sideBarItems.map((item) => {
+        {items.map((item) => {
           const isActive = matchPath(
             currentRoute.pathname,
             item.href,

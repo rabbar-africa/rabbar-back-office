@@ -1,6 +1,15 @@
 import type { ElementType } from 'react';
-import { useState } from 'react';
-import { Box, Button, Flex, Grid, Stack, Text, chakra } from '@chakra-ui/react';
+import { useRef, useState } from 'react';
+import {
+  Box,
+  Button,
+  Flex,
+  Grid,
+  Link,
+  Stack,
+  Text,
+  chakra,
+} from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { CustomInput } from '@/components/input';
@@ -9,7 +18,10 @@ import { EyeIcon, EyeOff, Lock, Mail } from '@/assets/custom';
 import { BuildingIcon } from '@/assets/custom/BuildingIcon';
 import { ChatCircle } from '@/assets/custom/ChatCircle';
 import { CalendarDotsIcon } from '@/assets/custom/CalendarDotsIcon';
+import { env } from '@/shared/constants/env';
 import { useLoginMutation } from '../api';
+import type { LoginCredentials } from '../api/types';
+import { SignInCode, type PendingSignIn } from './SignInCode';
 
 const loginSchema = Yup.object({
   email: Yup.string()
@@ -43,18 +55,46 @@ export function Login() {
   const loginMutation = useLoginMutation();
   const isPending = loginMutation.isPending;
 
+  // Step 2 is open while a code is pending. The email and password are kept
+  // in memory for "Send a new code" only, never stored, and dropped as soon
+  // as the admin leaves the code screen.
+  const [challenge, setChallenge] = useState<PendingSignIn | null>(null);
+  const [restartReason, setRestartReason] = useState<string | null>(null);
+  const credentials = useRef<LoginCredentials | null>(null);
+
+  const requestCode = (values: LoginCredentials) =>
+    loginMutation.mutateAsync(values).then((data) => {
+      credentials.current = values;
+      setRestartReason(null);
+      setChallenge({ ...data, sentAt: Date.now() });
+    });
+
+  const resendCode = async () => {
+    if (!credentials.current) return;
+    // A 429 ("A code was just sent…") is shown by the global error toast.
+    await requestCode(credentials.current).catch(() => undefined);
+  };
+
+  const restart = (reason?: string) => {
+    credentials.current = null;
+    setChallenge(null);
+    setRestartReason(reason ?? null);
+    formik.setFieldValue('password', '', false);
+    formik.setFieldTouched('password', false, false);
+  };
+
   const formik = useFormik({
     initialValues: { email: '', password: '' },
     validationSchema: loginSchema,
     validateOnChange: false,
     validateOnBlur: true,
-    onSubmit: (values) => {
-      loginMutation.mutate({
+    onSubmit: (values) =>
+      requestCode({
         // Normalize to guard against mobile keyboards that auto-capitalize.
         email: values.email.trim().toLowerCase(),
         password: values.password,
-      });
-    },
+        // Errors (wrong password, 429, 503) are shown by the global toast.
+      }).catch(() => undefined),
   });
 
   return (
@@ -88,102 +128,150 @@ export function Login() {
           {/* The brand panel is hidden on small screens, so show the logo here. */}
           <Logo w="7.5rem" mb="2rem" display={{ base: 'block', lg: 'none' }} />
 
-          <Text
-            fontSize={{ base: '1.5rem', md: '1.75rem' }}
-            fontWeight="700"
-            color="gray.500"
-            letterSpacing="-0.02em"
-            lineHeight="1.2"
-          >
-            Welcome back
-          </Text>
-          <Text textStyle="small-regular" color="gray.300" mt=".5rem">
-            Sign in to the Rabbar back office.
-          </Text>
+          {challenge ? (
+            <SignInCode
+              challenge={challenge}
+              onResend={resendCode}
+              resending={isPending}
+              onRestart={restart}
+            />
+          ) : (
+            <>
+              <Text
+                fontSize={{ base: '1.5rem', md: '1.75rem' }}
+                fontWeight="700"
+                color="gray.500"
+                letterSpacing="-0.02em"
+                lineHeight="1.2"
+              >
+                Welcome back
+              </Text>
+              <Text textStyle="small-regular" color="gray.300" mt=".5rem">
+                Sign in to the Rabbar back office. We'll email you a code to
+                finish signing in.
+              </Text>
 
-          <chakra.form mt="2rem" onSubmit={formik.handleSubmit} noValidate>
-            <Stack gap="1.25rem">
-              <CustomInput
-                label="Email"
-                placeholder="you@rabbar.africa"
-                required
-                disabled={isPending}
-                error={formik.touched.email ? formik.errors.email : undefined}
-                inputProps={{
-                  name: 'email',
-                  type: 'email',
-                  autoComplete: 'username',
-                  autoFocus: true,
-                  value: formik.values.email,
-                  onChange: formik.handleChange,
-                  onBlur: formik.handleBlur,
-                  h: '3rem',
-                }}
-                leftElement={<Mail w=".875rem" color="gray.300" />}
-              />
+              {restartReason && (
+                <Box
+                  role="alert"
+                  mt="1.25rem"
+                  bg="warning.50"
+                  rounded=".5rem"
+                  px=".875rem"
+                  py=".625rem"
+                >
+                  <Text textStyle="tiny-regular" color="secondary.500">
+                    {restartReason}
+                  </Text>
+                </Box>
+              )}
 
-              <CustomInput
-                label="Password"
-                placeholder="Enter your password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                disabled={isPending}
-                error={
-                  formik.touched.password ? formik.errors.password : undefined
-                }
-                inputProps={{
-                  name: 'password',
-                  autoComplete: 'current-password',
-                  value: formik.values.password,
-                  onChange: formik.handleChange,
-                  onBlur: formik.handleBlur,
-                  h: '3rem',
-                }}
-                leftElement={<Lock w=".75rem" color="gray.300" />}
-                rightElement={
-                  <chakra.button
-                    type="button"
-                    display="flex"
-                    cursor="pointer"
-                    alignItems="center"
-                    justifyContent="center"
-                    boxSize="2rem"
-                    rounded="md"
-                    color="gray.300"
-                    _hover={{ color: 'gray.500', bg: 'gray.50' }}
-                    aria-label={
-                      showPassword ? 'Hide password' : 'Show password'
+              <chakra.form mt="2rem" onSubmit={formik.handleSubmit} noValidate>
+                <Stack gap="1.25rem">
+                  <CustomInput
+                    label="Email"
+                    placeholder="you@rabbar.africa"
+                    required
+                    disabled={isPending}
+                    error={
+                      formik.touched.email ? formik.errors.email : undefined
                     }
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? (
-                      <EyeIcon w=".875rem" />
-                    ) : (
-                      <EyeOff w=".875rem" />
-                    )}
-                  </chakra.button>
-                }
-              />
-            </Stack>
+                    inputProps={{
+                      name: 'email',
+                      type: 'email',
+                      autoComplete: 'username',
+                      autoFocus: true,
+                      value: formik.values.email,
+                      onChange: formik.handleChange,
+                      onBlur: formik.handleBlur,
+                      h: '3rem',
+                    }}
+                    leftElement={<Mail w=".875rem" color="gray.300" />}
+                  />
 
-            <Button
-              mt="2rem"
-              width="full"
-              h="3rem"
-              type="submit"
-              bg="primary.300"
-              color="white"
-              fontWeight="600"
-              rounded=".625rem"
-              _hover={{ bg: 'primary.400' }}
-              _active={{ bg: 'primary.500' }}
-              loading={isPending}
-              loadingText="Signing in…"
-              disabled={isPending}
-            >
-              Sign in
-            </Button>
-          </chakra.form>
+                  <CustomInput
+                    label="Password"
+                    placeholder="Enter your password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    disabled={isPending}
+                    error={
+                      formik.touched.password
+                        ? formik.errors.password
+                        : undefined
+                    }
+                    inputProps={{
+                      name: 'password',
+                      autoComplete: 'current-password',
+                      value: formik.values.password,
+                      onChange: formik.handleChange,
+                      onBlur: formik.handleBlur,
+                      h: '3rem',
+                    }}
+                    leftElement={<Lock w=".75rem" color="gray.300" />}
+                    rightElement={
+                      <chakra.button
+                        type="button"
+                        display="flex"
+                        cursor="pointer"
+                        alignItems="center"
+                        justifyContent="center"
+                        boxSize="2rem"
+                        rounded="md"
+                        color="gray.300"
+                        _hover={{ color: 'gray.500', bg: 'gray.50' }}
+                        aria-label={
+                          showPassword ? 'Hide password' : 'Show password'
+                        }
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        {showPassword ? (
+                          <EyeIcon w=".875rem" />
+                        ) : (
+                          <EyeOff w=".875rem" />
+                        )}
+                      </chakra.button>
+                    }
+                  />
+                </Stack>
+
+                {/* Admins reset their password in the business app; the
+                  sign-in code still applies afterwards. */}
+                {env.BUSINESS_APP_URL && (
+                  <Flex justify="flex-end" mt=".75rem">
+                    <Link
+                      href={`${env.BUSINESS_APP_URL.replace(/\/$/, '')}/auth/forgot-password`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      fontSize="13px"
+                      fontWeight="500"
+                      color="primary.300"
+                    >
+                      Forgot password?
+                    </Link>
+                  </Flex>
+                )}
+
+                <Button
+                  mt="2rem"
+                  width="full"
+                  h="3rem"
+                  type="submit"
+                  bg="primary.300"
+                  color="white"
+                  fontWeight="600"
+                  rounded=".625rem"
+                  _hover={{ bg: 'primary.400' }}
+                  _active={{ bg: 'primary.500' }}
+                  loading={isPending}
+                  loadingText="Sending code…"
+                  disabled={isPending}
+                >
+                  Continue
+                </Button>
+              </chakra.form>
+            </>
+          )}
 
           <Flex
             mt="2rem"
@@ -205,7 +293,7 @@ export function Login() {
 }
 
 /** Left half on large screens: the brand, and what the back office does. */
-function BrandPanel() {
+export function BrandPanel() {
   return (
     <Flex
       display={{ base: 'none', lg: 'flex' }}

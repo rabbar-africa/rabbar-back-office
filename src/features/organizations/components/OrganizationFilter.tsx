@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Box, CloseButton, Flex } from '@chakra-ui/react';
+import { Box, CloseButton, Flex, type FlexProps } from '@chakra-ui/react';
 import { SearchCombobox } from '@/components/input';
 import { useGetOrganizations } from '../api/query';
 
@@ -8,6 +8,10 @@ interface OrganizationFilterProps {
   /** Kept alongside the id so the choice still reads after a reload. */
   organizationName: string;
   onChange: (organization: { id: string; name: string } | null) => void;
+  /** Shown when nothing is chosen. */
+  placeholder?: string;
+  /** Wrapper width; defaults to 13rem from md up. */
+  width?: FlexProps['w'];
 }
 
 /** Type-to-search organization picker for narrowing a platform-wide view. */
@@ -15,6 +19,8 @@ export function OrganizationFilter({
   organizationId,
   organizationName,
   onChange,
+  placeholder = 'All organizations',
+  width = { base: '100%', md: '13rem' },
 }: OrganizationFilterProps) {
   const [search, setSearch] = useState('');
   const { data, isFetching } = useGetOrganizations({
@@ -40,15 +46,10 @@ export function OrganizationFilter({
   }, [data, organizationId, organizationName]);
 
   return (
-    <Flex
-      align="center"
-      gap="1"
-      w={{ base: '100%', md: '13rem' }}
-      flexShrink={0}
-    >
+    <Flex align="center" gap="1" w={width} flexShrink={0}>
       <Box flex="1" minW={0}>
         <SearchCombobox
-          placeholder="All organizations"
+          placeholder={placeholder}
           options={options}
           value={organizationId}
           onChange={(id, option) => onChange({ id, name: option.label })}

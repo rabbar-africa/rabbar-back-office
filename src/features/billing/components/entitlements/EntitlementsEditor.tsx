@@ -16,6 +16,8 @@ import type {
   PlanEntitlements,
 } from '@/shared/interface/plan-entitlements';
 import {
+  canHaveThen,
+  draftRule,
   limitPhrase,
   PERIOD_LABELS,
   sameRule,
@@ -65,22 +67,14 @@ export function EntitlementsEditor({
       <Box>
         <SectionTitle
           title="Limits"
-          hint="How many of each. A monthly limit counts what was made this calendar month (Lagos time)."
+          hint="How many of each. A monthly limit counts what was made this calendar month (Lagos time). A limit in total can carry on with a number each month once it is used up (Starter: 15 invoices, then 3 a month); the month it runs out counts towards that month's allowance."
         />
         <Stack gap="0" borderWidth="1px" borderColor="gray.75" rounded=".5rem">
           {Object.entries(catalog.limits).map(([key, meta], index) => {
             const limit = draft.limits[key];
             const baseRule = base.limits[key];
             if (!limit || !baseRule) return null;
-            const typed = /^\d+$/.test(limit.max.trim())
-              ? Number(limit.max.trim())
-              : undefined;
-            const current = limit.unlimited
-              ? { max: null, per: limit.per }
-              : typed === undefined
-                ? undefined
-                : { max: typed, per: limit.per };
-            const changed = !sameRule(current, baseRule);
+            const changed = !sameRule(draftRule(limit), baseRule);
             return (
               <Row
                 key={key}
@@ -148,6 +142,46 @@ export function EntitlementsEditor({
                       </NativeSelect.Field>
                       <NativeSelect.Indicator />
                     </NativeSelect.Root>
+                  )}
+                  {/* After a capped total: "15, then 3 a month". */}
+                  {!meta.perDocumentType && canHaveThen(limit) && (
+                    <Flex gap=".5rem" align="center">
+                      <Text textStyle="tiny-regular" color="gray.400">
+                        then
+                      </Text>
+                      <Input
+                        size="sm"
+                        w="4.5rem"
+                        inputMode="numeric"
+                        aria-label={`${meta.label}: how many after that`}
+                        value={limit.thenMax}
+                        placeholder="none"
+                        onChange={(e) =>
+                          setLimit(key, {
+                            thenMax: e.target.value.replace(/\D/g, ''),
+                          })
+                        }
+                      />
+                      <NativeSelect.Root
+                        size="sm"
+                        w="6.5rem"
+                        disabled={!limit.thenMax}
+                      >
+                        <NativeSelect.Field
+                          aria-label={`${meta.label}: after that, counted`}
+                          value={limit.thenPer}
+                          onChange={(e) =>
+                            setLimit(key, {
+                              thenPer: e.target.value as LimitDraft['thenPer'],
+                            })
+                          }
+                        >
+                          <option value="month">A month</option>
+                          <option value="year">A year</option>
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                    </Flex>
                   )}
                 </Flex>
               </Row>
@@ -272,7 +306,8 @@ function Row({
           {changed && (
             <Button
               size="2xs"
-              variant="plain"
+              variant="ghost"
+              py="0"
               color="primary.300"
               px="0"
               h="auto"

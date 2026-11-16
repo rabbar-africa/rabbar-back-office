@@ -3,6 +3,20 @@ export interface LoginCredentials {
   password: string;
 }
 
+/** POST back-office/auth/login: a code was emailed; no tokens yet. */
+export interface SignInChallenge {
+  challengeId: string;
+  /** ISO time the code stops working (10 minutes after it was sent). */
+  expiresAt: string;
+  /** Masked address the code went to, e.g. "a***@rabbar.africa". */
+  sentTo: string;
+}
+
+export interface VerifySignInPayload {
+  challengeId: string;
+  code: string;
+}
+
 export interface AuthUser {
   id: string;
   email: string;

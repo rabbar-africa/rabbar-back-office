@@ -15,11 +15,23 @@ const FILTER_SCHEMA = {
   search: { defaultValue: '' },
 };
 
-export function OrgCustomersTab() {
-  const { id } = useParams<{ id: string }>();
+interface OrgCustomersTabProps {
+  /** The business; defaults to the business page's `:id`. */
+  organizationId?: string;
+  /** URL key prefix for the list's filters. */
+  urlPrefix?: string;
+}
+
+/** One business's customers. */
+export function OrgCustomersTab({
+  organizationId,
+  urlPrefix = 'customer_',
+}: OrgCustomersTabProps = {}) {
+  const params = useParams<{ id: string }>();
+  const id = organizationId ?? params.id;
   const [filters, setFilters] = useUrlState(FILTER_SCHEMA, {
     replace: true,
-    prefix: 'customer_',
+    prefix: urlPrefix,
   });
   const [searchInput, setSearchInput] = useState(filters.search);
 

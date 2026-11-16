@@ -13,8 +13,20 @@ import { ShieldIcon } from '@/assets/custom/ShieldIcon';
 import { TagIcon } from '@/assets/custom/TagIcon';
 import { CalendarDotsIcon } from '@/assets/custom/CalendarDotsIcon';
 import { ChatCircle } from '@/assets/custom/ChatCircle';
+import { UsersThree } from '@/assets/custom/UsersThree';
+import { ClockCounterClockwise } from '@/assets/custom/ClockCounterClockwise';
 
-export const sideBarItems = [
+export interface SideBarItem {
+  name: string;
+  icon: React.ElementType;
+  href: string;
+  slug: string;
+  paths: string[];
+  /** Shown to the back-office owners only (GET back-office/admins/me). */
+  ownersOnly?: boolean;
+}
+
+export const sideBarItems: SideBarItem[] = [
   {
     name: 'Dashboard',
     icon: DashboardIcon,
@@ -98,6 +110,21 @@ export const sideBarItems = [
     href: RouteConstants.access.base.path,
     slug: 'access-control',
     paths: [RouteConstants.access.base.path],
+  },
+  {
+    name: 'Admins',
+    icon: UsersThree,
+    href: RouteConstants.admins.base.path,
+    slug: 'admins',
+    paths: [RouteConstants.admins.base.path],
+  },
+  {
+    name: 'Access Log',
+    icon: ClockCounterClockwise,
+    href: RouteConstants.accessLog.base.path,
+    slug: 'access-log',
+    paths: [RouteConstants.accessLog.base.path],
+    ownersOnly: true,
   },
   {
     name: 'Reports',
