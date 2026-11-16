@@ -25,7 +25,7 @@ import { AddAdminModal } from '../components/AddAdminModal';
 const fullName = (admin: IAdmin) =>
   [admin.firstName, admin.lastName].filter(Boolean).join(' ') || admin.email;
 
-/** Everyone who can sign in to the back office. */
+/** Everyone who can sign in to the back office. Owners only (see the page). */
 export function AdminsTemplate() {
   const navigate = useNavigate();
   const { canManageAdmins } = useAdminPermissions();
@@ -234,9 +234,9 @@ export function AdminsTemplate() {
           wrap="wrap"
         >
           <Text textStyle="small-regular" color="gray.300">
-            {canManageAdmins
-              ? 'New admins get an emailed link to choose their own password (48 hours, single use). Deactivating an admin signs them out everywhere at once.'
-              : 'Only the back-office owners can add or deactivate admins.'}
+            New admins get an emailed link to choose their own password (48
+            hours, single use). Deactivating an admin signs them out everywhere
+            at once.
           </Text>
           <RefreshButton
             queryKeys={[[customQueryKey.admins.getAll]]}

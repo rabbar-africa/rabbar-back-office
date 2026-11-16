@@ -172,7 +172,7 @@ const settings = {
   editTeamMember: defineRoute('/settings/team-management/:id/edit' as const),
 } as const;
 
-/** Platform admins (everyone sees the list; owners add and deactivate). */
+/** Platform admins. Owners (super admins) only. */
 const admins = {
   base: defineRoute('/admins' as const),
 } as const;
