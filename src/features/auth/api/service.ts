@@ -70,4 +70,11 @@ export const authService = {
     const response = await axios.get<ApiResponse<IUser>>('/auth/me');
     return response.data.data;
   },
+
+  /** Ends every session of this account, this one included. */
+  logoutAll: async () => {
+    const response =
+      await axios.post<ApiResponse<{ signedOut: true }>>('/auth/logout-all');
+    return response.data.data;
+  },
 };

@@ -20,6 +20,7 @@ import { ChatCircle } from '@/assets/custom/ChatCircle';
 import { CalendarDotsIcon } from '@/assets/custom/CalendarDotsIcon';
 import { env } from '@/shared/constants/env';
 import { useLoginMutation } from '../api';
+import { takeSignOutReason } from '@/utils/session';
 import type { LoginCredentials } from '../api/types';
 import { SignInCode, type PendingSignIn } from './SignInCode';
 
@@ -59,7 +60,10 @@ export function Login() {
   // in memory for "Send a new code" only, never stored, and dropped as soon
   // as the admin leaves the code screen.
   const [challenge, setChallenge] = useState<PendingSignIn | null>(null);
-  const [restartReason, setRestartReason] = useState<string | null>(null);
+  // Starts with why they were signed out, when the API ended the session.
+  const [restartReason, setRestartReason] = useState<string | null>(
+    takeSignOutReason
+  );
   const credentials = useRef<LoginCredentials | null>(null);
 
   const requestCode = (values: LoginCredentials) =>

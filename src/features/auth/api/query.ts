@@ -1,15 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { authService } from './service';
+import { leaveToSignIn, signOut } from '@/utils/session';
 import type {
   LoginCredentials,
   RegisterPayload,
   VerifySignInPayload,
 } from './types';
-import {
-  setAccessToken,
-  setRefreshToken,
-  removeToken,
-} from '@/utils/persistToken';
+import { setAccessToken, setRefreshToken } from '@/utils/persistToken';
 import { toaster } from '@/components/ui';
 import { RouteConstants } from '@/shared/constants/routes';
 
@@ -76,9 +73,17 @@ export function useGetCurrentUserQuery(options?: { enabled?: boolean }) {
   });
 }
 
+/** Log out of this device: the API ends the session, then the browser. */
 export function useLogout() {
-  return () => {
-    removeToken();
-    window.location.replace(RouteConstants.auth.login.path);
-  };
+  return () => void signOut();
 }
+
+/**
+ * Sign out of all devices: every session ends, this one too, so the browser
+ * is cleared and sign-in opens. Failures toast globally and keep them in.
+ */
+export const useLogoutAllMutation = () =>
+  useMutation({
+    mutationFn: () => authService.logoutAll(),
+    onSuccess: () => leaveToSignIn(),
+  });
