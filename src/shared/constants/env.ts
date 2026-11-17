@@ -7,8 +7,8 @@ export const env = {
   ENCRYPTION_IV: import.meta.env.VITE_APP_ENCRYPTION_IV,
   /**
    * The business app (internal-web-tool), e.g. https://app.rabbar.africa.
-   * Admins reset a forgotten password there; the sign-in screen links to it
-   * only when this is set.
+   * Optional. Admins no longer reset passwords there: the back office has
+   * its own page (`/auth/forgot-password`).
    */
   BUSINESS_APP_URL: import.meta.env.VITE_APP_BUSINESS_APP_URL as
     | string

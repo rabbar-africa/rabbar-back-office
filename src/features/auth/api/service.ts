@@ -71,6 +71,32 @@ export const authService = {
     return response.data.data;
   },
 
+  /**
+   * Emails a 6-digit reset code. The API answers the same whether or not the
+   * email has an account, so this never says which emails exist.
+   */
+  forgotPassword: async (email: string): Promise<void> => {
+    await axios.post('/auth/forgot-password', {
+      email: email.trim().toLowerCase(),
+    });
+  },
+
+  /**
+   * Sets a new password with the emailed code. Every session of the account
+   * ends; the admin then signs in as usual (password, then a sign-in code).
+   */
+  resetPassword: async (payload: {
+    email: string;
+    otp: string;
+    password: string;
+  }): Promise<void> => {
+    await axios.post('/auth/reset-password', {
+      email: payload.email.trim().toLowerCase(),
+      otp: payload.otp.trim(),
+      password: payload.password,
+    });
+  },
+
   /** Ends every session of this account, this one included. */
   logoutAll: async () => {
     const response =

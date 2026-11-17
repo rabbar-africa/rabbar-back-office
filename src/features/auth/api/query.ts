@@ -34,6 +34,23 @@ export function useVerifySignInMutation() {
   });
 }
 
+/** Forgot password, step 1: email a reset code. */
+export function useForgotPasswordMutation() {
+  return useMutation({
+    mutationFn: (email: string) => authService.forgotPassword(email),
+  });
+}
+
+/** Forgot password, step 2: the code and a new password. */
+export function useResetPasswordMutation() {
+  return useMutation({
+    mutationFn: (payload: { email: string; otp: string; password: string }) =>
+      authService.resetPassword(payload),
+    // The form shows what went wrong beside the code.
+    meta: { skipErrorToast: true },
+  });
+}
+
 export function useRegisterMutation() {
   return useMutation({
     mutationFn: (payload: RegisterPayload) => authService.register(payload),

@@ -1,15 +1,6 @@
 import type { ElementType } from 'react';
 import { useRef, useState } from 'react';
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  Link,
-  Stack,
-  Text,
-  chakra,
-} from '@chakra-ui/react';
+import { Box, Button, Flex, Grid, Stack, Text, chakra } from '@chakra-ui/react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { CustomInput } from '@/components/input';
@@ -18,11 +9,13 @@ import { EyeIcon, EyeOff, Lock, Mail } from '@/assets/custom';
 import { BuildingIcon } from '@/assets/custom/BuildingIcon';
 import { ChatCircle } from '@/assets/custom/ChatCircle';
 import { CalendarDotsIcon } from '@/assets/custom/CalendarDotsIcon';
-import { env } from '@/shared/constants/env';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { RouteConstants } from '@/shared/constants/routes';
 import { useLoginMutation } from '../api';
 import { takeSignOutReason } from '@/utils/session';
 import type { LoginCredentials } from '../api/types';
 import { SignInCode, type PendingSignIn } from './SignInCode';
+import type { SignInNotice } from './ForgotPassword';
 
 const loginSchema = Yup.object({
   email: Yup.string()
@@ -52,6 +45,10 @@ const HIGHLIGHTS: Array<{ icon: ElementType; title: string; text: string }> = [
 ];
 
 export function Login() {
+  const navigate = useNavigate();
+  // After a password reset: say so, and fill in the email.
+  const arrived = (useLocation().state ?? null) as SignInNotice | null;
+  const [notice, setNotice] = useState<string | null>(arrived?.notice ?? null);
   const [showPassword, setShowPassword] = useState(false);
   const loginMutation = useLoginMutation();
   const isPending = loginMutation.isPending;
@@ -70,6 +67,7 @@ export function Login() {
     loginMutation.mutateAsync(values).then((data) => {
       credentials.current = values;
       setRestartReason(null);
+      setNotice(null);
       setChallenge({ ...data, sentAt: Date.now() });
     });
 
@@ -88,7 +86,7 @@ export function Login() {
   };
 
   const formik = useFormik({
-    initialValues: { email: '', password: '' },
+    initialValues: { email: arrived?.email ?? '', password: '' },
     validationSchema: loginSchema,
     validateOnChange: false,
     validateOnBlur: true,
@@ -154,6 +152,21 @@ export function Login() {
                 Sign in to the Rabbar back office. We'll email you a code to
                 finish signing in.
               </Text>
+
+              {notice && !restartReason && (
+                <Box
+                  role="status"
+                  mt="1.25rem"
+                  bg="success.50"
+                  rounded=".5rem"
+                  px=".875rem"
+                  py=".625rem"
+                >
+                  <Text textStyle="tiny-regular" color="success.300">
+                    {notice}
+                  </Text>
+                </Box>
+              )}
 
               {restartReason && (
                 <Box
@@ -239,22 +252,24 @@ export function Login() {
                   />
                 </Stack>
 
-                {/* Admins reset their password in the business app; the
-                  sign-in code still applies afterwards. */}
-                {env.BUSINESS_APP_URL && (
-                  <Flex justify="flex-end" mt=".75rem">
-                    <Link
-                      href={`${env.BUSINESS_APP_URL.replace(/\/$/, '')}/auth/forgot-password`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      fontSize="13px"
-                      fontWeight="500"
-                      color="primary.300"
-                    >
-                      Forgot password?
-                    </Link>
-                  </Flex>
-                )}
+                {/* The back office's own reset: an emailed code, then a
+                  new password; the sign-in code still applies afterwards. */}
+                <Flex justify="flex-end" mt=".75rem">
+                  <chakra.button
+                    type="button"
+                    fontSize="13px"
+                    fontWeight="500"
+                    color="primary.300"
+                    cursor="pointer"
+                    _hover={{ textDecoration: 'underline' }}
+                    disabled={isPending}
+                    onClick={() =>
+                      navigate(RouteConstants.auth.forgotPassword.path)
+                    }
+                  >
+                    Forgot password?
+                  </chakra.button>
+                </Flex>
 
                 <Button
                   mt="2rem"
