@@ -168,6 +168,7 @@ const settings = {
   profileSettings: defineRoute('/settings/profile' as const),
   accountSettings: defineRoute('/settings/account' as const),
   teamManagement: defineRoute('/settings/team-management' as const),
+  security: defineRoute('/settings/security' as const),
   createTeamMember: defineRoute('/settings/team-management/create' as const),
   editTeamMember: defineRoute('/settings/team-management/:id/edit' as const),
 } as const;

@@ -9,6 +9,13 @@ export interface ISettingsSection {
 
 export const settingsSections: ISettingsSection[] = [
   {
+    id: 'security',
+    title: 'Sign-in & security',
+    description:
+      'Sign out of all devices if your account may be in use elsewhere.',
+    href: RouteConstants.settings.security.path,
+  },
+  {
     id: '1',
     title: 'General',
     description: 'Fiscal year, date format and org preferences.',

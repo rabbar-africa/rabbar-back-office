@@ -1,9 +1,7 @@
 import { matchPath } from '@/utils/navigation';
-import { removeToken } from '@/utils/persistToken';
+import { useLogout } from '@/features/auth/api/query';
 import { useLocation, useNavigate } from 'react-router';
 import { Box, Flex, Text } from '@chakra-ui/react';
-import { RouteConstants } from '@/shared/constants/routes';
-import storage from '@/utils/storage';
 import { Logo } from '../common/Logo';
 import { sideBarItems } from '@/shared/data';
 import { CaretLeft } from '@/assets/custom/CaretLeft';
@@ -30,11 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     (item) => !item.ownersOnly || canManageAdmins
   );
 
-  const handleLogout = () => {
-    removeToken();
-    storage.clearValue('current_org');
-    window.location.replace(RouteConstants.auth.login.path);
-  };
+  const handleLogout = useLogout();
 
   const collapsed = !mobile && isCollapsed;
 

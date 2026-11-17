@@ -1,6 +1,7 @@
 import { getToken } from '@/utils/persistToken';
 import storage from '@/utils/storage';
 import { AxiosError } from 'axios';
+import { isSessionEnded, leaveToSignIn } from '@/utils/session';
 import type { InternalAxiosRequestConfig } from 'axios';
 
 export function rejectErrorInterceptor(error: AxiosError) {
@@ -23,6 +24,19 @@ export function authRequestInterceptor(config: InternalAxiosRequestConfig) {
 export async function refreshTokenInterceptor(error: AxiosError) {
   const status = error?.response?.status;
   const message: any = error?.response?.data;
+
+  // The session was ended (signed out everywhere, password reset, account
+  // deactivated): leave now and say why on the sign-in page. Not on the
+  // sign-in calls themselves, whose refusal the form shows.
+  const said = typeof message === 'object' ? message?.message : message;
+  if (
+    status === 401 &&
+    isSessionEnded(said) &&
+    !error.config?.url?.includes('auth/login')
+  ) {
+    leaveToSignIn(said);
+    return Promise.reject(error);
+  }
 
   // Check if the response is unauthorized (401 or 520) and the request hasn't been retried yet
   if (

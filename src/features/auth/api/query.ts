@@ -1,15 +1,12 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { authService } from './service';
+import { leaveToSignIn, signOut } from '@/utils/session';
 import type {
   LoginCredentials,
   RegisterPayload,
   VerifySignInPayload,
 } from './types';
-import {
-  setAccessToken,
-  setRefreshToken,
-  removeToken,
-} from '@/utils/persistToken';
+import { setAccessToken, setRefreshToken } from '@/utils/persistToken';
 import { toaster } from '@/components/ui';
 import { RouteConstants } from '@/shared/constants/routes';
 
@@ -34,6 +31,23 @@ export function useVerifySignInMutation() {
 
       window.location.replace(RouteConstants.overview.base.path);
     },
+  });
+}
+
+/** Forgot password, step 1: email a reset code. */
+export function useForgotPasswordMutation() {
+  return useMutation({
+    mutationFn: (email: string) => authService.forgotPassword(email),
+  });
+}
+
+/** Forgot password, step 2: the code and a new password. */
+export function useResetPasswordMutation() {
+  return useMutation({
+    mutationFn: (payload: { email: string; otp: string; password: string }) =>
+      authService.resetPassword(payload),
+    // The form shows what went wrong beside the code.
+    meta: { skipErrorToast: true },
   });
 }
 
@@ -76,9 +90,17 @@ export function useGetCurrentUserQuery(options?: { enabled?: boolean }) {
   });
 }
 
+/** Log out of this device: the API ends the session, then the browser. */
 export function useLogout() {
-  return () => {
-    removeToken();
-    window.location.replace(RouteConstants.auth.login.path);
-  };
+  return () => void signOut();
 }
+
+/**
+ * Sign out of all devices: every session ends, this one too, so the browser
+ * is cleared and sign-in opens. Failures toast globally and keep them in.
+ */
+export const useLogoutAllMutation = () =>
+  useMutation({
+    mutationFn: () => authService.logoutAll(),
+    onSuccess: () => leaveToSignIn(),
+  });
