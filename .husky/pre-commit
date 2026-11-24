@@ -1,22 +1,32 @@
 echo "🚀 Running pre-commit checks..."
 
-# Format all files
-echo "📝 Running format..."
-yarn run format
+# Only the files staged for this commit (added, copied, modified, renamed),
+# NUL-separated so names with spaces are safe.
+STAGED_FORMAT=$(git diff --cached --name-only -z --diff-filter=ACMR -- '*.js' '*.json' '*.ts' '*.tsx' | tr '\0' '\n')
+STAGED_LINT=$(git diff --cached --name-only -z --diff-filter=ACMR -- 'src/*.ts' 'src/*.tsx' | tr '\0' '\n')
 
-# Run lint-staged for staged files
-echo "📝 Running lint-staged..."
-yarn lint
+# Format the staged files, and re-stage only those (never other changes).
+if [ -n "$STAGED_FORMAT" ]; then
+  echo "📝 Formatting staged files..."
+  echo "$STAGED_FORMAT" | tr '\n' '\0' | xargs -0 yarn -s prettier --write --ignore-unknown || exit 1
+fi
 
+# Lint (and fix) the staged source files.
+if [ -n "$STAGED_LINT" ]; then
+  echo "📝 Linting staged files..."
+  echo "$STAGED_LINT" | tr '\n' '\0' | xargs -0 yarn -s eslint --fix --report-unused-disable-directives --max-warnings 0 || exit 1
+fi
+
+if [ -n "$STAGED_FORMAT" ]; then
+  echo "$STAGED_FORMAT" | tr '\n' '\0' | xargs -0 git add --
+fi
 
 # Generate types
-echo "🔍 Generating type ..."
-yarn  run gen:theme-typings
+echo "🔍 Generating types..."
+yarn -s run gen:theme-typings || exit 1
 
-# Run type checking across all packages
+# Type-check the whole project
 echo "🔍 Running type checks..."
-yarn check-types
-
-git add -A .
+yarn -s check-types || exit 1
 
 echo "✅ Pre-commit checks completed successfully!"

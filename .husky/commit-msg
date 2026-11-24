@@ -1,2 +1,2 @@
 echo "🔍 Validating commit message..."
-pnpm commitlint --edit $1
+yarn -s commitlint --edit "$1"
