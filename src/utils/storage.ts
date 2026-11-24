@@ -10,8 +10,6 @@ export type keyType =
   | 'current_org'
   | 'user_organizations';
 
-const DEFAULT_EXPIRY_DURATION: DurationType = { unit: 'DAY', value: 1 };
-
 function getExpiresTime(payload: DurationType) {
   switch (payload.unit) {
     case 'SECOND':
@@ -20,6 +18,8 @@ function getExpiresTime(payload: DurationType) {
       return new Date().getTime() + 1000 * 60 * payload.value;
     case 'HOUR':
       return new Date().getTime() + 1000 * 60 * 60 * payload.value;
+    case 'DAY':
+      return new Date().getTime() + 1000 * 60 * 60 * 24 * payload.value;
   }
 }
 
@@ -31,9 +31,10 @@ const storage = {
         return null;
       }
       const item = JSON.parse(itemStr);
-      const now = new Date().getTime();
 
-      if (now > item.expiresIn) {
+      // Only entries written with a duration carry an expiry; the rest live
+      // until they are cleared explicitly.
+      if (item.expiresIn && new Date().getTime() > item.expiresIn) {
         storage.clearValue(key);
         return null;
       }
@@ -45,10 +46,11 @@ const storage = {
     }
   },
 
+  /** Without a `duration` the entry never expires: no expiry is recorded. */
   setValue: (key: keyType, value: unknown, duration?: DurationType) => {
     const item = {
       value: value,
-      expiresIn: getExpiresTime(duration || DEFAULT_EXPIRY_DURATION),
+      ...(duration ? { expiresIn: getExpiresTime(duration) } : {}),
     };
     window.localStorage.setItem(`${storagePrefix}${key}`, JSON.stringify(item));
   },

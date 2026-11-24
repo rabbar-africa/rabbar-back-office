@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { reloadForNewDeploy } from './utils/chunk-reload';
+import { migrateTokensToCookies } from './utils/persistToken';
+
+// Before anything reads a token: carry localStorage tokens over to cookies.
+migrateTokensToCookies();
 
 // Vite fires this when a modulepreload for a lazy chunk 404s, which happens to
 // open tabs after a redeploy replaces the hashed filenames. Don't call
