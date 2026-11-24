@@ -10,7 +10,7 @@
     "lint": "eslint --fix --ext ts,tsx ./src --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
     "preview": "vite preview",
-    "check-types": "tsc --noEmit",
+    "check-types": "tsc --noEmit -p tsconfig.app.json",
     "gen:theme-typings": "chakra typegen ./src/theme/index.ts",
     "prepare": "husky"
   },
